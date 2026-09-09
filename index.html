@@ -4,47 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Capitaliza-T Online: El Tablero de tu Vida</title>
-    
-    <!-- SDK de Firebase (v8 para máxima estabilidad en navegadores escolares) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
-        :root {
-            --bg: #0f172a; --panel: #1e293b; --cell-bg: #ffffff;
-            --p1: #ef4444; --p2: #3b82f6; --p3: #eab308; --p4: #22c55e;
-            --accent: #6366f1; --secondary: #94a3b8;
-        }
+        :root { --bg: #0f172a; --panel: #1e293b; --cell-bg: #ffffff; --p1: #ef4444; --p2: #3b82f6; --p3: #eab308; --p4: #22c55e; --accent: #6366f1; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        
         #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
-        .login-card { background: var(--panel); padding: 40px; border-radius: 20px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); text-align: center; }
-        input { padding: 15px; border-radius: 10px; border: 2px solid #334155; width: 280px; font-size: 1rem; margin-bottom: 15px; display: block; background: #0f172a; color: white; text-align: center; }
-        
+        .login-card { background: var(--panel); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
+        input { padding: 15px; border-radius: 10px; border: 2px solid #334155; width: 280px; margin-bottom: 15px; background: #0f172a; color: white; text-align: center; font-size: 1rem; }
         #game-container { display: none; gap: 30px; padding: 20px; max-width: 1200px; width: 95%; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
         #game-container.active { display: flex; }
-
-        #board {
-            display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
-            gap: 8px; width: 600px; height: 600px; background: #334155; padding: 10px; border-radius: 12px;
-        }
-
+        #board { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); gap: 8px; width: 600px; height: 600px; background: #334155; padding: 10px; border-radius: 12px; }
         .cell { background: var(--cell-bg); color: #1e293b; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; font-size: 0.65rem; font-weight: 900; text-align: center; }
         .center-space { grid-column: 2 / 6; grid-row: 2 / 6; background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px; }
-
         .token-container { display: flex; flex-wrap: wrap; gap: 3px; position: absolute; bottom: 5px; }
         .token { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff; }
-
         #ui-panel { width: 350px; background: var(--panel); padding: 25px; border-radius: 15px; display: flex; flex-direction: column; gap: 15px; }
         .player-card { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-left: 8px solid transparent; margin-bottom: 5px; }
         .turn-active { background: rgba(99, 102, 241, 0.2); border: 2px solid var(--accent); }
-
         button { padding: 15px; font-size: 1rem; cursor: pointer; border: none; border-radius: 10px; background: var(--accent); color: white; font-weight: bold; text-transform: uppercase; box-shadow: 0 4px #4338ca; }
         button:disabled { background: #475569; box-shadow: none; cursor: not-allowed; }
-        .btn-secondary { background: #475569; margin-top: 5px; font-size: 0.8rem; box-shadow: 0 4px #1e293b; }
-
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
-        .modal-content { background: white; color: #1e293b; padding: 40px; border-radius: 20px; width: 420px; text-align: center; }
+        .modal-content { background: white; color: #1e293b; padding: 40px; border-radius: 20px; width: 400px; text-align: center; }
         .modal-btn { background: var(--bg); color: white; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; border: none; width: 100%; font-weight: bold; }
     </style>
 </head>
@@ -52,10 +33,9 @@
 
 <div id="login-screen">
     <div class="login-card">
-        <h1>🏦 CAPITALIZA-T ONLINE</h1>
-        <p>Juego de 2 a 4 jugadores (v2.0 Corr.)</p>
-        <input type="text" id="room-input" placeholder="CÓDIGO SALA (ej: CURSO4A)">
-        <input type="text" id="name-input" placeholder="TU NOMBRE EXACTO">
+        <h1>🏦 CAPITALIZA-T</h1>
+        <input type="text" id="room-input" placeholder="CÓDIGO SALA">
+        <input type="text" id="name-input" placeholder="TU NOMBRE">
         <button onclick="joinGame()">ENTRAR A LA SALA</button>
     </div>
 </div>
@@ -63,41 +43,24 @@
 <div id="game-container">
     <div id="board">
         <div class="center-space">
-            <h2 id="room-display" style="margin:0; color:var(--accent)">SALA: ---</h2>
+            <h2 id="room-display" style="margin:0; color:var(--accent)">---</h2>
             <div id="dice-anim" style="font-size: 5rem; margin: 10px 0;">🎲</div>
             <h3 id="month-display" style="margin:0">MES 1 / 60</h3>
         </div>
     </div>
-
     <div id="ui-panel">
-        <h2 id="turn-indicator">Esperando partida...</h2>
+        <h2 id="turn-indicator">SALA DE ESPERA</h2>
         <div id="players-list"></div>
         <button id="start-btn" style="display:none; background:#22c55e;" onclick="startGame()">INICIAR PARTIDA 🏁</button>
         <button id="roll-btn" onclick="rollDice()" disabled>LANZAR DADOS 🎲</button>
-        <button class="btn-secondary" onclick="toggleReadme(true)">📖 REGLAS (README)</button>
+        <button onclick="toggleReadme(true)" style="background:#475569; font-size:0.8rem; margin-top:10px;">📖 REGLAS</button>
     </div>
 </div>
 
-<div id="modal-decision" class="modal-overlay">
-    <div class="modal-content">
-        <h2 id="m-title"></h2>
-        <div id="m-desc" style="margin: 20px 0; font-weight: 500;"></div>
-        <div id="m-options"></div>
-    </div>
-</div>
-
-<div id="modal-readme" class="modal-overlay">
-    <div class="modal-content" style="text-align: left;">
-        <h2 style="text-align: center;">📜 REGLAS DEL JUEGO</h2>
-        <p><strong>Meta:</strong> Llegar al mes 60 con el mayor Patrimonio Neto (Saldo + AFP - Deudas).</p>
-        <p><strong>Endeudamiento:</strong> No pidas créditos si la cuota supera el <strong>25% de tu ingreso líquido</strong>.</p>
-        <p><strong>AFP:</strong> Elige multifondos según tu riesgo. El <strong>Fondo A</strong> crece más a largo plazo.</p>
-        <button class="modal-btn" onclick="toggleReadme(false)">VOLVER</button>
-    </div>
-</div>
+<div id="modal-decision" class="modal-overlay"><div class="modal-content"><h2 id="m-title"></h2><div id="m-desc" style="margin:20px 0;"></div><div id="m-options"></div></div></div>
+<div id="modal-readme" class="modal-overlay"><div class="modal-content" style="text-align:left;"><h2>📜 REGLAS</h2><p><strong>Meta:</strong> Mes 60 con mayor Patrimonio.</p><p><strong>Regla 25%:</strong> No pidas deudas si la cuota supera 1/4 de tu saldo.</p><button class="modal-btn" onclick="toggleReadme(false)">VOLVER</button></div></div>
 
 <script>
-    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyCygRQQdJVDMBWICWQmHhaNNC89xu5xviQ",
       authDomain: "financiera-4fb83.firebaseapp.com",
@@ -111,29 +74,19 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
     let roomCode, myName, myId, isHost = false;
+
     const CASILLAS = [
-        { n: "INICIO", type: "gain", amt: 600000, icon: "🚀" },
-        { n: "Dividendo Vivienda", type: "pay", amt: 300000, icon: "🏠" },
-        { n: "Banco: Crédito", type: "bank", icon: "🏦" },
-        { n: "Estrategia AFP", type: "afp", icon: "📈" },
-        { n: "Gasto Alimentos", type: "pay", amt: 100000, icon: "🛒" },
-        { n: "Mora: Cárcel", type: "event", icon: "🔒" },
-        { n: "Bono Desempeño", type: "gain", amt: 80000, icon: "🎁" },
-        { n: "Ahorro Automático", type: "save", icon: "💰" },
-        { n: "Salida Social", type: "pay", amt: 45000, icon: "🍿" },
-        { n: "Reclamo SERNAC", type: "event", icon: "🛡️" },
-        { n: "Servicios Básico", type: "pay", amt: 60000, icon: "🚰" },
-        { n: "PAGO DE SUELDO", type: "gain", amt: 600000, icon: "💵" },
-        { n: "Avance Efectivo", type: "bank", icon: "💳" },
-        { n: "Capacitación", type: "save", icon: "📚" },
-        { n: "Emergencia PC", type: "pay", amt: 150000, icon: "🔧" },
-        { n: "Rentabilidad AFP", type: "event", icon: "📊" },
-        { n: "Cuenta 2 / APV", type: "save", icon: "🌱" },
-        { n: "Viaje Amigos", type: "pay", amt: 300000, icon: "✈️" },
-        { n: "Seguro SIS / Salud", type: "event", icon: "🏥" },
-        { n: "Fondos para Pie", type: "save", icon: "🔑" }
+        { n: "INICIO", type: "gain", amt: 600000, icon: "🚀" }, { n: "Arriendo", type: "pay", amt: 300000, icon: "🏠" },
+        { n: "Banco", type: "bank", icon: "🏦" }, { n: "AFP", type: "afp", icon: "📈" },
+        { n: "Comida", type: "pay", amt: 100000, icon: "🛒" }, { n: "Cárcel", type: "event", icon: "🔒" },
+        { n: "Bono", type: "gain", amt: 80000, icon: "🎁" }, { n: "Ahorro", type: "save", icon: "💰" },
+        { n: "Ocio", type: "pay", amt: 45000, icon: "🍿" }, { n: "SERNAC", type: "event", icon: "🛡️" },
+        { n: "Agua/Luz", type: "pay", amt: 60000, icon: "🚰" }, { n: "SUELDO", type: "gain", amt: 600000, icon: "💵" },
+        { n: "Avance", type: "bank", icon: "💳" }, { n: "Curso", type: "save", icon: "📚" },
+        { n: "Repara PC", type: "pay", amt: 150000, icon: "🔧" }, { n: "Interés AFP", type: "event", icon: "📊" },
+        { n: "APV", type: "save", icon: "🌱" }, { n: "Viaje", type: "pay", amt: 300000, icon: "✈️" },
+        { n: "Seguro SIS", type: "event", icon: "🏥" }, { n: "Pie Casa", type: "save", icon: "🔑" }
     ];
 
     function joinGame() {
@@ -143,34 +96,21 @@
 
         const roomRef = db.ref('rooms/' + roomCode);
         roomRef.once('value', snapshot => {
-            let data = snapshot.val() || { players: {}, turn: 0, month: 1, started: false, playerOrder: [] };
+            let data = snapshot.val() || { started: false, playerOrder: [] };
             let playersMap = data.players || {};
-            
-            // LÓGICA DE REINGRESO (REJOIN)
             let existingId = Object.keys(playersMap).find(id => playersMap[id].name === myName);
-            
+
             if (existingId) {
                 myId = existingId;
-                if (data.playerOrder && data.playerOrder === myId) isHost = true;
             } else {
-                if (data.started) return alert("La partida ya comenzó con otros jugadores.");
-                let pCount = Object.keys(playersMap).length;
-                if (pCount >= 4) return alert("Sala llena.");
-
+                if (data.started) return alert("Partida en curso.");
                 const newP = roomRef.child('players').push();
                 myId = newP.key;
-                if(pCount === 0) isHost = true;
-
-                newP.set({
-                    name: myName, pos: 0, money: 600000, afp: 50000, debt: 0,
-                    color: ['#ef4444','#3b82f6','#eab308','#22c55e'][pCount]
-                });
-
+                newP.set({ name: myName, pos: 0, money: 600000, afp: 50000, debt: 0, color: ['#ef4444','#3b82f6','#eab308','#22c55e'][Object.keys(playersMap).length] });
                 let newOrder = data.playerOrder || [];
                 newOrder.push(myId);
                 roomRef.update({ playerOrder: newOrder });
             }
-
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('game-container').classList.add('active');
             document.getElementById('room-display').innerText = "SALA: " + roomCode;
@@ -179,12 +119,12 @@
         });
     }
 
-    function startGame() { db.ref('rooms/' + roomCode).update({ started: true }); }
-
     function startSync() {
         db.ref('rooms/' + roomCode).on('value', snapshot => {
             const data = snapshot.val();
             if (!data) return;
+            // Corregir Host: el primero de la lista es siempre el host
+            isHost = (data.playerOrder && data.playerOrder === myId);
             updateUI(data);
             updateTokens(data.players);
         });
@@ -194,62 +134,58 @@
         const list = document.getElementById('players-list');
         list.innerHTML = "";
         const order = data.playerOrder || [];
-        
+        const currentTurnId = order[data.turn];
+
         order.forEach((id, index) => {
             const p = data.players[id];
-            if (!p) return;
             const isTurn = index === data.turn;
-            
             list.innerHTML += `<div class="player-card ${isTurn && data.started ? 'turn-active' : ''}" style="border-left-color:${p.color}">
                 <strong>${p.name}</strong> ${isTurn && data.started ? '⭐' : ''}<br>
                 Saldo: $${p.money.toLocaleString()} | AFP: $${p.afp.toLocaleString()}</div>`;
-            
-            if (isTurn && data.started) {
-                document.getElementById('roll-btn').disabled = (id !== myId);
-                document.getElementById('turn-indicator').innerText = (id === myId) ? "¡TE TOCA!" : "Turno de " + p.name;
-            }
         });
 
         if(!data.started) {
-            document.getElementById('turn-indicator').innerText = "SALA DE ESPERA...";
-            if(isHost && order.length >= 2) document.getElementById('start-btn').style.display = "block";
+            document.getElementById('turn-indicator').innerText = "SALA DE ESPERA";
+            document.getElementById('start-btn').style.display = (isHost && order.length >= 2) ? "block" : "none";
+            document.getElementById('roll-btn').disabled = true;
         } else {
             document.getElementById('start-btn').style.display = "none";
+            document.getElementById('turn-indicator').innerText = (currentTurnId === myId) ? "¡ES TU TURNO!" : "Turno de otros...";
+            document.getElementById('roll-btn').disabled = (currentTurnId !== myId);
         }
-        document.getElementById('month-display').innerText = `MES ${data.month} / 60`;
+        document.getElementById('month-display').innerText = `MES ${data.month || 1} / 60`;
     }
 
+    function startGame() { db.ref('rooms/' + roomCode).update({ started: true, turn: 0, month: 1 }); }
+
     function rollDice() {
-        document.getElementById('roll-btn').disabled = true; // Anti-spam
+        document.getElementById('roll-btn').disabled = true;
         const dice = Math.floor(Math.random() * 6) + 1;
         document.getElementById('dice-anim').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1];
-        
         const ref = db.ref('rooms/' + roomCode);
         ref.once('value', snap => {
             const d = snap.val();
-            if (d.playerOrder[d.turn] !== myId) return; // Validación de seguridad
-
             const p = d.players[myId];
             let newPos = (p.pos + dice) % 20;
             ref.child('players/' + myId).update({ pos: newPos });
-            processLanding(CASILLAS[newPos], p, ref, d);
+            setTimeout(() => processLanding(CASILLAS[newPos], p, ref, d), 600);
         });
     }
 
     function processLanding(cell, p, ref, data) {
         if(cell.type === "pay") {
             ref.child('players/' + myId).update({ money: p.money - cell.amt });
-            setTimeout(() => next(ref, data), 1200);
+            setTimeout(() => next(ref, data), 1000);
         } else if(cell.type === "bank") {
             const cap = Math.max(0, (p.money / 4));
-            showDecision("🏦 BANCO CENTRAL", `Crédito: $250.000. Cuota: $28.000 x 10 meses.<br><b>Tu capacidad (25%): $${cap.toLocaleString()}</b>`, [
-                {t: "Aceptar", a: () => { ref.child('players/' + myId).update({ money: p.money + 250000, debt: p.debt + 280000 }); next(ref, data); }},
+            showDecision("🏦 BANCO", `Crédito: $200k. Cuota: $22k x 12. <br>Capacidad: $${cap.toLocaleString()}`, [
+                {t: "Aceptar", a: () => { ref.child('players/' + myId).update({ money: p.money + 200000, debt: p.debt + 264000 }); next(ref, data); }},
                 {t: "Rechazar", a: () => next(ref, data)}
             ]);
         } else if(cell.type === "afp") {
-            showDecision("📈 AFP: MULTIFONDOS", "¿Dónde inviertes este año?", [
-                {t: "Fondo A (Riesgo/Ganancia)", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 15000 }); next(ref, data); }},
-                {t: "Fondo E (Seguridad)", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 4000 }); next(ref, data); }}
+            showDecision("📈 AFP", "¿Invertir en Fondo A o E?", [
+                {t: "Fondo A", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 15000 }); next(ref, data); }},
+                {t: "Fondo E", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 5000 }); next(ref, data); }}
             ]);
         } else { next(ref, data); }
     }
@@ -258,27 +194,22 @@
         document.getElementById('modal-decision').style.display = 'none';
         let nTotal = data.playerOrder.length;
         let nextIdx = (data.turn + 1) % nTotal;
-        let nMonth = (nextIdx === 0) ? data.month + 1 : data.month;
+        let nMonth = (nextIdx === 0) ? (data.month || 1) + 1 : (data.month || 1);
         ref.update({ turn: nextIdx, month: nMonth });
     }
 
     function showDecision(title, desc, opts) {
-        const m = document.getElementById('modal-decision');
-        m.style.display = 'flex';
-        document.getElementById('m-title').innerHTML = title;
-        document.getElementById('m-desc').innerHTML = desc;
+        const m = document.getElementById('modal-decision'); m.style.display = 'flex';
+        document.getElementById('m-title').innerText = title; document.getElementById('m-desc').innerHTML = desc;
         const area = document.getElementById('m-options'); area.innerHTML = "";
-        opts.forEach(o => {
-            const b = document.createElement('button'); b.innerText = o.t; b.className = "modal-btn"; b.onclick = o.a; area.appendChild(b);
-        });
+        opts.forEach(o => { const b = document.createElement('button'); b.innerText = o.t; b.className = "modal-btn"; b.onclick = o.a; area.appendChild(b); });
     }
 
     function initBoard() {
         const board = document.getElementById('board');
         const mapping = ['1/1','1/2','1/3','1/4','1/5','1/6','2/6','3/6','4/6','5/6','6/6','6/5','6/4','6/3','6/2','6/1','5/1','4/1','3/1','2/1'];
         CASILLAS.forEach((c, i) => {
-            const div = document.createElement('div');
-            div.className = 'cell'; div.style.gridArea = mapping[i].replace('/',' / ');
+            const div = document.createElement('div'); div.className = 'cell'; div.style.gridArea = mapping[i].replace('/',' / ');
             div.innerHTML = `<span style="font-size:1.1rem">${c.icon}</span><br>${c.n}<div class="token-container" id="slot-${i}"></div>`;
             board.appendChild(div);
         });
