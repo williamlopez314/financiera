@@ -2,161 +2,149 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ruta 2027: Carrera de Obstáculos Financieros</title>
+    <title>Capitaliza-T: El Tablero Financiero</title>
     <style>
-        :root { --blue: #2c3e50; --green: #27ae60; --red: #e74c3c; --yellow: #f1c40f; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; overflow-x: hidden; }
-        #game-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
-        header { background: var(--blue); color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        :root { --board-bg: #ecf0f1; --player1: #e74c3c; --player2: #3498db; --player3: #f1c40f; --player4: #27ae60; }
+        body { font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; background: #2c3e50; color: white; margin: 0; }
         
-        #track-area { flex-grow: 1; position: relative; background: #fff; overflow-x: auto; white-space: nowrap; padding: 50px 0; }
-        .lane { height: 80px; border-bottom: 2px dashed #ccc; position: relative; width: 5000px; display: flex; align-items: center; }
-        .lane-label { position: sticky; left: 10px; background: rgba(255,255,255,0.8); padding: 5px; z-index: 10; font-weight: bold; border-radius: 5px; }
+        #game-wrapper { display: flex; padding: 20px; gap: 20px; }
         
-        .runner { width: 50px; height: 50px; position: absolute; left: 0; transition: left 0.5s linear; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 5; }
+        /* Tablero Cuadrado */
+        #board { display: grid; grid-template-columns: repeat(6, 80px); grid-template-rows: repeat(6, 80px); gap: 4px; background: #bdc3c7; pading: 5px; border: 5px solid #7f8c8d; }
+        .cell { background: white; color: #333; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 4px; position: relative; font-weight: bold;}
+        .corner { background: #95a5a6; }
         
-        .hurdle { position: absolute; width: 40px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: 20px; border-left: 3px solid; }
-        .hurdle.credit { border-color: var(--red); color: var(--red); }
-        .hurdle.save { border-color: var(--green); color: var(--green); }
-        .hurdle.inst { border-color: var(--blue); color: var(--blue); }
-        .hurdle-label { font-size: 10px; transform: rotate(-45deg); margin-bottom: 60px; }
+        /* Jugadores */
+        .token { width: 15px; height: 15px; border-radius: 50%; position: absolute; border: 2px solid white; transition: all 0.3s; }
+        #t0 { background: var(--player1); top: 5px; left: 5px; }
+        #t1 { background: var(--player2); top: 5px; right: 5px; }
+        #t2 { background: var(--player3); bottom: 5px; left: 5px; }
+        #t3 { background: var(--player4); bottom: 5px; right: 5px; }
 
-        #ui-panel { background: #eee; padding: 15px; display: flex; justify-content: space-around; border-top: 2px solid #ddd; }
-        .stat-card { background: white; padding: 10px; border-radius: 8px; border: 1px solid #ccc; min-width: 150px; }
+        /* UI */
+        #ui { width: 300px; background: #34495e; padding: 20px; border-radius: 10px; }
+        .stat-box { margin-bottom: 10px; padding: 10px; border-left: 5px solid; }
+        button { width: 100%; padding: 15px; font-size: 18px; cursor: pointer; background: #e67e22; color: white; border: none; border-radius: 5px; font-weight: bold; }
         
-        #decision-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 100; max-width: 400px; text-align: center; }
-        .btn { padding: 10px 20px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; font-weight: bold; }
-        .btn-primary { background: var(--blue); }
-        .btn-success { background: var(--green); }
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 30px; border-radius: 15px; z-index: 100; width: 350px; text-align: center; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>🏁 RUTA 2027: El Gran Obstáculo Financiero (5 Años)</h1>
-    <p>Objetivo: Llegar al mes 60 con capacidad para el "Pie" de tu vivienda</p>
-</header>
+<h1>🏦 CAPITALIZA-T: 4to MEDIO</h1>
+<div id="game-wrapper">
+    <div id="board">
+        <!-- Generado por JS -->
+    </div>
 
-<div id="track-area">
-    <!-- Generado por JS -->
+    <div id="ui">
+        <h2 id="turn-label">Turno: Jugador 1</h2>
+        <div id="player-stats"></div>
+        <button onclick="rollDice()">🎲 LANZAR DADOS</button>
+        <p>Tiempo restante: <span id="timer">30:00</span></p>
+    </div>
 </div>
 
-<div id="ui-panel">
-    <div class="stat-card"><strong>Mes:</strong> <span id="current-month">1</span>/60</div>
-    <div class="stat-card"><strong>Saldo:</strong> $<span id="balance">0</span></div>
-    <div class="stat-card"><strong>Carga Financiera:</strong> <span id="debt-load">0</span>%</div>
-    <div class="stat-card"><strong>AFP Acumulado:</strong> $<span id="afp-total">0</span></div>
-</div>
-
-<div id="decision-modal">
-    <h3 id="modal-title">⚠️ ¡IMPREVISTO!</h3>
-    <p id="modal-text">Tu notebook ha muerto. Necesitas $850.000 para Ingeniería.</p>
-    <div id="modal-options"></div>
+<div id="modal">
+    <h2 id="m-title"></h2>
+    <p id="m-desc"></p>
+    <div id="m-options"></div>
 </div>
 
 <script>
-    const CONFIG = {
-        totalMonths: 60,
-        baseIncome: 500000,
-        fixedExpenses: 350000, // Arriendo y comida
-        hurdles: [
-            { month: 5, type: 'credit', title: '💻 Notebook quemado', text: '¿Cómo pagas los $850.000?', options: [
-                { text: 'Tarjeta (12 cuotas, CAE 35%)', impact: -85000, debt: 12 },
-                { text: 'Ahorro (Usar fondo emergencia)', impact: -400000, debt: 0 }
-            ]},
-            { month: 12, type: 'inst', title: '🏦 Trivia CMF', text: '¿Quién regula las tarjetas de retail?', options: [
-                { text: 'CMF (Correcto +$50k)', impact: 50000 },
-                { text: 'Banco Central (Incorrecto)', impact: 0 }
-            ]},
-            { month: 24, type: 'save', title: '📈 Bono Desempeño', text: 'Recibes $200.000 extra.', options: [
-                { text: 'Ahorro en Cuenta 2 (AFP)', impact: 200000, afp: true },
-                { text: 'Viaje con amigos', impact: 0 }
-            ]},
-            { month: 36, type: 'credit', title: '🏥 Urgencia Médica', text: 'Cuenta de $1.200.000.', options: [
-                { text: 'Préstamo Fonasa (5% sueldo)', impact: -25000, debt: 24 },
-                { text: 'Avance en Efectivo', impact: -120000, debt: 12 }
-            ]},
-            { month: 55, type: 'inst', title: '🏠 El Sueño del Pie', text: '¿Tienes el 20% para el departamento de UF 2.900?', options: [
-                { text: 'Evaluar mi ahorro', impact: 0 }
-            ]}
-        ]
-    };
+    const cells = [
+        { n: "INICIO", type: "start" }, { n: "Gasto Común", type: "pay", amt: 50000 }, { n: "AFP: Elige Fondo", type: "afp" }, { n: "Crédito Consumo", type: "bank" }, { n: "Supermercado", type: "pay", amt: 80000 }, { n: "Cárcel Deuda", type: "corner" },
+        { n: "Bono Estatal", type: "gain", amt: 100000 }, { n: "Pie Depto", type: "invest", cost: 500000 }, { n: "SERNAC: Reclamo", type: "event" }, { n: "Salida Cine", type: "pay", amt: 30000 }, { n: "Interés APV", type: "gain", amt: 50000 }, { n: "Urgencia Médica", type: "pay", amt: 150000 },
+        { n: "Invierte: Curso", type: "invest", cost: 200000 }, { n: "AFP: Mercado Caído", type: "event" }, { n: "Banco: Avance", type: "bank" }, { n: "Compra Ropa", type: "pay", amt: 60000 }, { n: "Día de Pago", type: "gain", amt: 450000 }, { n: "Vacaciones", type: "pay", amt: 200000 },
+        { n: "Seguro SIS", type: "event" }, { n: "Pie Auto", type: "invest", cost: 300000 }
+    ];
 
-    let gameState = { month: 1, balance: 200000, afp: 0, currentDebt: 0, isPaused: false };
-    const trackArea = document.getElementById('track-area');
+    let players = [
+        { id: 1, pos: 0, money: 500000, afp: 0, debt: 0 },
+        { id: 2, pos: 0, money: 500000, afp: 0, debt: 0 },
+        { id: 3, pos: 0, money: 500000, afp: 0, debt: 0 },
+        { id: 4, pos: 0, money: 500000, afp: 0, debt: 0 }
+    ];
+    let turn = 0;
 
-    function initGame() {
-        const lane = document.createElement('div');
-        lane.className = 'lane';
-        lane.innerHTML = `<div class="lane-label">TU RUTA</div><div id="p1" class="runner">🏃</div>`;
-        
-        CONFIG.hurdles.forEach(h => {
-            const hDiv = document.createElement('div');
-            hDiv.className = `hurdle ${h.type}`;
-            hDiv.style.left = `${h.month * 80}px`;
-            hDiv.innerHTML = `<span class="hurdle-label">${h.title}</span><span>${h.type === 'credit' ? '💳' : h.type === 'save' ? '💰' : '🏦'}</span>`;
-            lane.appendChild(hDiv);
-        });
-        
-        trackArea.appendChild(lane);
-        gameLoop();
+    function initBoard() {
+        const b = document.getElementById('board');
+        // Crear 20 casillas en anillo (simplificado)
+        for(let i=0; i<20; i++) {
+            let div = document.createElement('div');
+            div.className = "cell";
+            div.id = "cell-" + i;
+            div.innerHTML = `<span>${cells[i].n}</span>`;
+            if(i==0) div.innerHTML += `<div class="token" id="t0"></div><div class="token" id="t1"></div><div class="token" id="t2"></div><div class="token" id="t3"></div>`;
+            b.appendChild(div);
+        }
+        updateUI();
     }
 
-    function gameLoop() {
-        if (gameState.month > CONFIG.totalMonths || gameState.isPaused) return;
-
-        // Lógica de mes automático (Equilibrio Financiero [1])
-        let monthlySurplus = CONFIG.baseIncome - CONFIG.fixedExpenses - gameState.currentDebt;
-        gameState.balance += monthlySurplus;
-        gameState.afp += CONFIG.baseIncome * 0.10; // Pilar contributivo [12]
-
-        // Actualizar UI
-        document.getElementById('current-month').innerText = gameState.month;
-        document.getElementById('balance').innerText = gameState.balance.toLocaleString();
-        document.getElementById('afp-total').innerText = Math.floor(gameState.afp).toLocaleString();
-        document.getElementById('debt-load').innerText = Math.round((gameState.currentDebt / (CONFIG.baseIncome - 350000)) * 100);
+    function rollDice() {
+        let roll = Math.floor(Math.random() * 6) + 1;
+        let p = players[turn];
+        p.pos = (p.pos + roll) % 20;
         
-        document.getElementById('p1').style.left = `${gameState.month * 80}px`;
+        // Mover token
+        document.querySelectorAll('.token')[turn].parentElement.removeChild(document.querySelectorAll('.token')[turn]);
+        let token = document.createElement('div');
+        token.className = "token";
+        token.id = "t" + turn;
+        document.getElementById('cell-' + p.pos).appendChild(token);
 
-        // Check vallas
-        const hurdle = CONFIG.hurdles.find(h => h.month === gameState.month);
-        if (hurdle) {
-            triggerDecision(hurdle);
+        handleLand(p, cells[p.pos]);
+    }
+
+    function handleLand(p, cell) {
+        if(cell.type === "pay") {
+            p.money -= cell.amt;
+            alert(`Jugador ${p.id} pagó ${cell.n}: -$${cell.amt}`);
+            nextTurn();
+        } else if (cell.type === "bank") {
+            showModal("BANCO", `¿Deseas un crédito de $200.000? CAE: 25%. Cuota: $25.000 x 10 meses.`, [
+                {t: "Aceptar (Carga Financiera)", a: () => { p.money += 200000; p.debt += 250000; nextTurn(); }},
+                {t: "Rechazar", a: () => nextTurn()}
+            ]);
         } else {
-            gameState.month++;
-            setTimeout(gameLoop, 600);
+            nextTurn();
         }
     }
 
-    function triggerDecision(hurdle) {
-        gameState.isPaused = true;
-        const modal = document.getElementById('decision-modal');
-        modal.style.display = 'block';
-        document.getElementById('modal-title').innerText = hurdle.title;
-        document.getElementById('modal-text').innerText = hurdle.text;
-        
-        const optionsDiv = document.getElementById('modal-options');
-        optionsDiv.innerHTML = '';
-        hurdle.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-primary';
-            btn.innerText = opt.text;
-            btn.onclick = () => applyDecision(opt);
-            optionsDiv.appendChild(btn);
+    function nextTurn() {
+        document.getElementById('modal').style.display = 'none';
+        turn = (turn + 1) % 4;
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('turn-label').innerText = "Turno: Jugador " + (turn + 1);
+        let html = "";
+        players.forEach(p => {
+            html += `<div class="stat-box" style="border-color:var(--player${p.id})">
+                <b>J${p.id}</b> | Saldo: $${p.money.toLocaleString()} | Deuda: $${p.debt.toLocaleString()}
+            </div>`;
+        });
+        document.getElementById('player-stats').innerHTML = html;
+    }
+
+    function showModal(title, desc, opts) {
+        const m = document.getElementById('modal');
+        m.style.display = 'block';
+        document.getElementById('m-title').innerText = title;
+        document.getElementById('m-desc').innerText = desc;
+        const optDiv = document.getElementById('m-options');
+        optDiv.innerHTML = "";
+        opts.forEach(o => {
+            let btn = document.createElement('button');
+            btn.innerText = o.t;
+            btn.onclick = o.a;
+            btn.style.margin = "5px 0";
+            optDiv.appendChild(btn);
         });
     }
 
-    function applyDecision(opt) {
-        if (opt.debt) gameState.currentDebt += Math.abs(opt.impact);
-        else gameState.balance += opt.impact;
-        
-        document.getElementById('decision-modal').style.display = 'none';
-        gameState.isPaused = false;
-        gameState.month++;
-        gameLoop();
-    }
-
-    initGame();
+    initBoard();
 </script>
 </body>
 </html>
