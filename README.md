@@ -1,4 +1,7 @@
+Monopoli Financiero
+
 🎮 Objetivo del Juego
+
 Llegar al mes 60 con el mayor Patrimonio Neto, el cual se calcula sumando tu Saldo Disponible más tus Ahorros en la AFP, y restando el total de tus Deudas Acumuladas. La meta es evitar el sobreendeudamiento y lograr financiar el "pie" para una vivienda de UF 2.900 al final del recorrido.
 
 🛠️ Preparación e Ingreso
