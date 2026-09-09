@@ -1,26 +1,45 @@
-# Rumbo a la U
+🎮 Objetivo del Juego
+Llegar al mes 60 con el mayor Patrimonio Neto, el cual se calcula sumando tu Saldo Disponible más tus Ahorros en la AFP, y restando el total de tus Deudas Acumuladas. La meta es evitar el sobreendeudamiento y lograr financiar el "pie" para una vivienda de UF 2.900 al final del recorrido.
 
-Juego educativo de finanzas personales para estudiantes de 4° medio. Simula el primer año universitario (independencia, arriendo, movilización, imprevistos, créditos, ahorro, AFP/APV) en 6 rondas, jugable hasta con 4 personas desde computadores distintos, sincronizado con Firebase Realtime Database.
+🛠️ Preparación e Ingreso
+Acceso: Cada jugador debe ingresar desde su computador o tablet a la URL de GitHub Pages proporcionada por el docente.
 
-## Publicar en GitHub Pages
+Sala de Juego: Un integrante del grupo de 4 debe inventar un Código de Sala (ej. "MAT4A") y compartirlo con sus compañeros para que todos entren a la misma partida sincronizada.
 
-1. Crea un repositorio nuevo en GitHub (puede ser público).
-2. Sube el archivo `index.html` a la raíz del repositorio (arrastrar y soltar en la web de GitHub funciona).
-3. Ve a **Settings → Pages**.
-4. En "Source" elige la rama `main` y la carpeta `/ (root)`, luego guarda.
-5. En 1-2 minutos, GitHub te dará un link tipo `https://tu-usuario.github.io/tu-repositorio/`. Ese es el link para compartir con los estudiantes.
+Identificación: Ingresa tu nombre y elige un color de ficha para comenzar la carrera con un saldo inicial de $600.000 y $50.000 en tu fondo de AFP.
 
-## Cómo se juega
+🎲 Mecánica de la Carrera
 
-1. Un/a estudiante crea una sala (recibe un código de 4 dígitos) y lo comparte con su grupo.
-2. Hasta 3 personas más se unen escribiendo ese código y su nombre, cada una desde su propio computador.
-3. El anfitrión/a inicia la partida cuando estén todos listos.
-4. Cada jugador/a elige su arriendo, movilización e ingreso inicial (mes 0).
-5. Se juegan 6 meses por turnos: cada jugador enfrenta el mismo evento del mes con sus propios números, y decide.
-6. Al final se muestra un ranking con salud financiera, ahorro, deuda y un tip personalizado para cada uno/a.
+Movimiento: Los jugadores lanzan un dado de 6 caras para avanzar por las 20 casillas del tablero perimetral.
 
-Duración estimada con 4 jugadores: 25-30 minutos.
+El Tiempo (Meses): El reloj de la carrera avanza un mes cada vez que todos los jugadores (el ciclo completo de 4 turnos) han realizado su movimiento.
 
-## Nota sobre los datos
+Equilibrio Financiero: Al pasar por la casilla de Inicio ("Día de Pago"), recibes tu sueldo, pero el sistema aplica automáticamente los descuentos legales del 10% para la AFP (Pilar Contributivo) y el pago de gastos fijos.
 
-La partida usa una base de datos en modo de prueba (abierta por 30 días desde su creación). Si planeas usar el juego después de esa fecha, entra a la consola de Firebase → Realtime Database → Reglas, y extiende la fecha de expiración o cambia las reglas a `".read": true, ".write": true` de forma permanente.
+🚦 Decisiones en las Casillas
+Dependiendo del color y tipo de casilla donde caiga tu ficha, deberás enfrentar distintos desafíos:
+
+🏦 Casillas de Banco (Crédito):
+Se te presentará una oferta de crédito de consumo o avance en efectivo.
+
+Regla de Oro: Antes de aceptar, el juego te recordará tu capacidad de pago. La cuota no debe superar el 25% de tu ingreso líquido (Sueldo - Arriendo).
+
+Análisis: Debes evaluar la CAE (Carga Anual Equivalente) para comparar con otras ofertas y el CTC (Costo Total del Crédito) para saber cuánto pagarás de más por los intereses.
+
+📈 Casillas de AFP:
+Deberás elegir en qué Multifondo invertir tu ahorro (del A al E).
+Recuerda que a tu edad (18-20 años) se recomienda el Fondo A por tener mayor rentabilidad esperada a largo plazo, aunque sea más riesgoso.
+Puedes optar por sumar APV (Ahorro Previsional Voluntario) para ver cómo el interés compuesto hace crecer tu fondo más rápido que el de tus compañeros.
+
+🛒 Casillas de Gastos y Eventos:
+
+Gastos variables: Supermercado, reparaciones o salidas de ocio restarán dinero directamente de tu saldo.
+
+Imprevistos: Emergencias médicas te obligarán a decidir entre usar tu Fondo de Emergencia (Ahorro) o endeudarte con la tarjeta.
+
+Derechos: Las casillas del SERNAC pueden darte beneficios si has sido víctima de publicidad engañosa o "ventas atadas".
+
+🏆 Final del Juego y Veredicto
+Al llegar al Mes 60, el juego se detiene y muestra el podio final basado en la salud financiera de cada estudiante.
+
+El Ganador: No es necesariamente quien tiene más efectivo, sino quien gestionó mejor sus deudas y logró acumular más ahorro previsional e inversiones
