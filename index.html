@@ -2,46 +2,122 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Capitaliza-T: El Tablero Financiero</title>
+    <title>Capitaliza-T: El Tablero de tu Vida</title>
     <style>
-        :root { --board-bg: #ecf0f1; --player1: #e74c3c; --player2: #3498db; --player3: #f1c40f; --player4: #27ae60; }
-        body { font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; background: #2c3e50; color: white; margin: 0; }
+        :root {
+            --bg: #1a1a2e;
+            --cell-bg: #ffffff;
+            --text: #16213e;
+            --p1: #ff2e63; --p2: #08d9d6; --p3: #f9ed69; --p4: #95e1d3;
+            --accent: #4ecdc4;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; color: white; }
         
-        #game-wrapper { display: flex; padding: 20px; gap: 20px; }
-        
-        /* Tablero Cuadrado */
-        #board { display: grid; grid-template-columns: repeat(6, 80px); grid-template-rows: repeat(6, 80px); gap: 4px; background: #bdc3c7; pading: 5px; border: 5px solid #7f8c8d; }
-        .cell { background: white; color: #333; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 4px; position: relative; font-weight: bold;}
-        .corner { background: #95a5a6; }
-        
-        /* Jugadores */
-        .token { width: 15px; height: 15px; border-radius: 50%; position: absolute; border: 2px solid white; transition: all 0.3s; }
-        #t0 { background: var(--player1); top: 5px; left: 5px; }
-        #t1 { background: var(--player2); top: 5px; right: 5px; }
-        #t2 { background: var(--player3); bottom: 5px; left: 5px; }
-        #t3 { background: var(--player4); bottom: 5px; right: 5px; }
+        header { margin: 20px 0; text-align: center; }
+        h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; }
 
-        /* UI */
-        #ui { width: 300px; background: #34495e; padding: 20px; border-radius: 10px; }
-        .stat-box { margin-bottom: 10px; padding: 10px; border-left: 5px solid; }
-        button { width: 100%; padding: 15px; font-size: 18px; cursor: pointer; background: #e67e22; color: white; border: none; border-radius: 5px; font-weight: bold; }
+        #main-container { display: flex; gap: 30px; padding: 20px; max-width: 1200px; width: 95%; flex-wrap: wrap; justify-content: center; }
+
+        /* TABLERO ESTILO MONOPOLY (6x6) */
+        #board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 8px;
+            width: 600px;
+            height: 600px;
+            background: #252a34;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .cell {
+            background: var(--cell-bg);
+            color: var(--text);
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            box-sizing: border-box;
+            transition: transform 0.2s;
+        }
+
+        /* Colores por categoría */
+        .cell-header { width: 100%; height: 15px; border-radius: 4px; margin-bottom: 5px; }
+        .bank { border-top: 5px solid #e74c3c; }
+        .afp { border-top: 5px solid #3498db; }
+        .save { border-top: 5px solid #27ae60; }
+        .event { border-top: 5px solid #f1c40f; }
+
+        /* Espacio Central */
+        .center-space {
+            grid-column: 2 / 6;
+            grid-row: 2 / 6;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+        }
+
+        /* Jugadores (Tokens) */
+        .token-container { display: flex; flex-wrap: wrap; gap: 4px; position: absolute; bottom: 5px; }
+        .token {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* UI Lateral */
+        #panel { width: 350px; background: #0f3460; padding: 25px; border-radius: 15px; display: flex; flex-direction: column; gap: 15px; }
+        .player-stat { background: rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; border-left: 6px solid transparent; }
         
-        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 30px; border-radius: 15px; z-index: 100; width: 350px; text-align: center; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
+        button {
+            padding: 15px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 10px;
+            background: #e94560; color: white; font-weight: bold; text-transform: uppercase;
+            box-shadow: 0 4px #c0392b; margin-top: 10px;
+        }
+        button:active { transform: translateY(2px); box-shadow: 0 2px #c0392b; }
+
+        /* Modal de Decisión */
+        #modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; color: var(--text); padding: 30px; border-radius: 20px;
+            z-index: 1000; width: 400px; text-align: center;
+            box-shadow: 0 0 200px rgba(0,0,0,0.9);
+        }
+        .modal-btn { background: var(--bg); color: white; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; border: none; width: 100%; }
+        .modal-btn:hover { background: #e94560; }
     </style>
 </head>
 <body>
 
-<h1>🏦 CAPITALIZA-T: 4to MEDIO</h1>
-<div id="game-wrapper">
+<header>
+    <h1>🏦 CAPITALIZA-T</h1>
+    <p>Simulador de 5 años de vida financiera (60 meses)</p>
+</header>
+
+<div id="main-container">
     <div id="board">
-        <!-- Generado por JS -->
+        <!-- Generado por JS: 20 casillas perimetrales -->
+        <div class="center-space">
+            <h2 id="month-display">Mes 1 / 60</h2>
+            <div id="dice-result" style="font-size: 3rem;">🎲</div>
+        </div>
     </div>
 
-    <div id="ui">
-        <h2 id="turn-label">Turno: Jugador 1</h2>
-        <div id="player-stats"></div>
-        <button onclick="rollDice()">🎲 LANZAR DADOS</button>
-        <p>Tiempo restante: <span id="timer">30:00</span></p>
+    <div id="panel">
+        <h2 id="current-turn" style="color: var(--p1)">Turno: Jugador 1</h2>
+        <div id="stats-area"></div>
+        <button onclick="playTurn()">Lanzar Dados 🎲</button>
+        <div id="timer" style="text-align: center; margin-top: 10px;">Tiempo: 30:00</div>
     </div>
 </div>
 
@@ -52,99 +128,146 @@
 </div>
 
 <script>
-    const cells = [
-        { n: "INICIO", type: "start" }, { n: "Gasto Común", type: "pay", amt: 50000 }, { n: "AFP: Elige Fondo", type: "afp" }, { n: "Crédito Consumo", type: "bank" }, { n: "Supermercado", type: "pay", amt: 80000 }, { n: "Cárcel Deuda", type: "corner" },
-        { n: "Bono Estatal", type: "gain", amt: 100000 }, { n: "Pie Depto", type: "invest", cost: 500000 }, { n: "SERNAC: Reclamo", type: "event" }, { n: "Salida Cine", type: "pay", amt: 30000 }, { n: "Interés APV", type: "gain", amt: 50000 }, { n: "Urgencia Médica", type: "pay", amt: 150000 },
-        { n: "Invierte: Curso", type: "invest", cost: 200000 }, { n: "AFP: Mercado Caído", type: "event" }, { n: "Banco: Avance", type: "bank" }, { n: "Compra Ropa", type: "pay", amt: 60000 }, { n: "Día de Pago", type: "gain", amt: 450000 }, { n: "Vacaciones", type: "pay", amt: 200000 },
-        { n: "Seguro SIS", type: "event" }, { n: "Pie Auto", type: "invest", cost: 300000 }
+    // Configuración de Casillas (20 en total para el perímetro 6x6)
+    const CASILLAS = [
+        { n: "INICIO", type: "start", icon: "🚀" },
+        { n: "Gasto Común", type: "pay", amt: 60000, icon: "🏠" },
+        { n: "Banco: Crédito", type: "bank", icon: "🏦" },
+        { n: "AFP: Elige Fondo", type: "afp", icon: "📈" },
+        { n: "Supermercado", type: "pay", amt: 120000, icon: "🛒" },
+        { n: "Cárcel Deuda", type: "event", icon: "🔒" }, // Esquina
+        { n: "Bono Estatal", type: "gain", amt: 100000, icon: "🎁" },
+        { n: "Ahorro Automático", type: "save", icon: "💰" },
+        { n: "Salida Ocio", type: "pay", amt: 40000, icon: "🍿" },
+        { n: "SERNAC: Defensa", type: "event", icon: "🛡️" },
+        { n: "Luz y Agua", type: "pay", amt: 55000, icon: "🚰" },
+        { n: "Día de Pago", type: "gain", amt: 500000, icon: "💵" }, // Esquina
+        { n: "Banco: Avance", type: "bank", icon: "💳" },
+        { n: "Invierte: Curso", type: "save", icon: "📚" },
+        { n: "Reparación PC", type: "pay", amt: 150000, icon: "💻" },
+        { n: "AFP: Rentabilidad", type: "event", icon: "📊" },
+        { n: "Ahorro APV", type: "save", icon: "🌱" },
+        { n: "Vacaciones", type: "pay", amt: 250000, icon: "✈️" },
+        { n: "Seguro SIS", type: "event", icon: "🏥" },
+        { n: "Pie Casa", type: "save", icon: "🔑" }
     ];
 
     let players = [
-        { id: 1, pos: 0, money: 500000, afp: 0, debt: 0 },
-        { id: 2, pos: 0, money: 500000, afp: 0, debt: 0 },
-        { id: 3, pos: 0, money: 500000, afp: 0, debt: 0 },
-        { id: 4, pos: 0, money: 500000, afp: 0, debt: 0 }
+        { id: 1, name: "J1", pos: 0, money: 500000, afp: 0, debt: 0, color: '#ff2e63' },
+        { id: 2, name: "J2", pos: 0, money: 500000, afp: 0, debt: 0, color: '#08d9d6' },
+        { id: 3, name: "J3", pos: 0, money: 500000, afp: 0, debt: 0, color: '#f9ed69' },
+        { id: 4, name: "J4", pos: 0, money: 500000, afp: 0, debt: 0, color: '#95e1d3' }
     ];
     let turn = 0;
+    let globalMonth = 1;
 
-    function initBoard() {
-        const b = document.getElementById('board');
-        // Crear 20 casillas en anillo (simplificado)
-        for(let i=0; i<20; i++) {
-            let div = document.createElement('div');
-            div.className = "cell";
-            div.id = "cell-" + i;
-            div.innerHTML = `<span>${cells[i].n}</span>`;
-            if(i==0) div.innerHTML += `<div class="token" id="t0"></div><div class="token" id="t1"></div><div class="token" id="t2"></div><div class="token" id="t3"></div>`;
-            b.appendChild(div);
-        }
-        updateUI();
+    function renderBoard() {
+        const board = document.getElementById('board');
+        // Limpiar tokens anteriores si existieran
+        const mapping = [
+            '1/1','1/2','1/3','1/4','1/5','1/6',
+            '2/6','3/6','4/6','5/6','6/6',
+            '6/5','6/4','6/3','6/2','6/1',
+            '5/1','4/1','3/1','2/1'
+        ];
+
+        CASILLAS.forEach((c, i) => {
+            const cellDiv = document.createElement('div');
+            cellDiv.className = `cell ${c.type}`;
+            cellDiv.style.gridArea = mapping[i].replace('/',' / ');
+            cellDiv.innerHTML = `<span>${c.icon}</span><span style="text-align:center">${c.n}</span><div class="token-container" id="pos-${i}"></div>`;
+            board.appendChild(cellDiv);
+        });
+        updateStats();
+        placeTokens();
     }
 
-    function rollDice() {
-        let roll = Math.floor(Math.random() * 6) + 1;
-        let p = players[turn];
-        p.pos = (p.pos + roll) % 20;
+    function placeTokens() {
+        players.forEach((p, i) => {
+            const container = document.getElementById(`pos-${p.pos}`);
+            const token = document.createElement('div');
+            token.className = "token";
+            token.style.backgroundColor = p.color;
+            container.appendChild(token);
+        });
+    }
+
+    function playTurn() {
+        const dice = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('dice-result').innerText = (dice === 1 ? '⚀' : dice === 2 ? '⚁' : dice === 3 ? '⚂' : dice === 4 ? '⚃' : dice === 5 ? '⚄' : '⚅');
         
-        // Mover token
-        document.querySelectorAll('.token')[turn].parentElement.removeChild(document.querySelectorAll('.token')[turn]);
-        let token = document.createElement('div');
-        token.className = "token";
-        token.id = "t" + turn;
-        document.getElementById('cell-' + p.pos).appendChild(token);
+        let p = players[turn];
+        p.pos = (p.pos + dice) % 20;
+        
+        // Simular paso del tiempo: cada 4 turnos (una ronda completa de jugadores) sube un mes
+        if(turn === 3) {
+            globalMonth++;
+            document.getElementById('month-display').innerText = `Mes ${globalMonth} / 60`;
+        }
 
-        handleLand(p, cells[p.pos]);
-    }
-
-    function handleLand(p, cell) {
-        if(cell.type === "pay") {
-            p.money -= cell.amt;
-            alert(`Jugador ${p.id} pagó ${cell.n}: -$${cell.amt}`);
-            nextTurn();
-        } else if (cell.type === "bank") {
-            showModal("BANCO", `¿Deseas un crédito de $200.000? CAE: 25%. Cuota: $25.000 x 10 meses.`, [
-                {t: "Aceptar (Carga Financiera)", a: () => { p.money += 200000; p.debt += 250000; nextTurn(); }},
-                {t: "Rechazar", a: () => nextTurn()}
-            ]);
+        // Ejecutar lógica de casilla
+        const land = CASILLAS[p.pos];
+        if(land.type === "pay") {
+            p.money -= land.amt;
+            resolveTurn();
+        } else if(land.type === "bank") {
+            askCredit(p);
         } else {
-            nextTurn();
+            resolveTurn();
         }
     }
 
-    function nextTurn() {
-        document.getElementById('modal').style.display = 'none';
-        turn = (turn + 1) % 4;
-        updateUI();
+    function askCredit(p) {
+        // Regla del 25%: Capacidad de endeudamiento [3]
+        const maxCuota = (500000 - 300000) / 4; // Simplificado: Ingreso - Arriendo / 4
+        showModal("🏦 OFERTA BANCARIA", `Crédito de $300.000. Cuota: $35.000 x 12 meses. <br><b>Tu capacidad max: $${maxCuota}</b>`, [
+            {t: "Aceptar (Pagaré CTC)", a: () => { p.money += 300000; p.debt += 420000; resolveTurn(); }},
+            {t: "Rechazar", a: () => resolveTurn()}
+        ]);
     }
 
-    function updateUI() {
-        document.getElementById('turn-label').innerText = "Turno: Jugador " + (turn + 1);
+    function resolveTurn() {
+        document.getElementById('modal').style.display = 'none';
+        const container = document.getElementById(`pos-${players[turn].pos}`);
+        document.querySelectorAll('.token')[turn].remove();
+        const token = document.createElement('div');
+        token.className = "token";
+        token.style.backgroundColor = players[turn].color;
+        container.appendChild(token);
+
+        turn = (turn + 1) % 4;
+        document.getElementById('current-turn').innerText = `Turno: Jugador ${turn + 1}`;
+        document.getElementById('current-turn').style.color = players[turn].color;
+        updateStats();
+    }
+
+    function updateStats() {
         let html = "";
         players.forEach(p => {
-            html += `<div class="stat-box" style="border-color:var(--player${p.id})">
-                <b>J${p.id}</b> | Saldo: $${p.money.toLocaleString()} | Deuda: $${p.debt.toLocaleString()}
+            html += `<div class="player-stat" style="border-color:${p.color}">
+                <strong>${p.name}</strong> | Saldo: $${p.money.toLocaleString()}<br>
+                Deuda: $${p.debt.toLocaleString()} | AFP: $${p.afp.toLocaleString()}
             </div>`;
         });
-        document.getElementById('player-stats').innerHTML = html;
+        document.getElementById('stats-area').innerHTML = html;
     }
 
     function showModal(title, desc, opts) {
-        const m = document.getElementById('modal');
-        m.style.display = 'block';
-        document.getElementById('m-title').innerText = title;
-        document.getElementById('m-desc').innerText = desc;
-        const optDiv = document.getElementById('m-options');
-        optDiv.innerHTML = "";
+        document.getElementById('modal').style.display = 'block';
+        document.getElementById('m-title').innerHTML = title;
+        document.getElementById('m-desc').innerHTML = desc;
+        const optArea = document.getElementById('m-options');
+        optArea.innerHTML = "";
         opts.forEach(o => {
-            let btn = document.createElement('button');
-            btn.innerText = o.t;
-            btn.onclick = o.a;
-            btn.style.margin = "5px 0";
-            optDiv.appendChild(btn);
+            const b = document.createElement('button');
+            b.className = "modal-btn";
+            b.innerText = o.t;
+            b.onclick = o.a;
+            optArea.appendChild(b);
         });
     }
 
-    initBoard();
+    renderBoard();
 </script>
 </body>
 </html>
