@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Capitaliza-T Online: El Tablero de tu Vida</title>
     
-    <!-- SDK de Firebase -->
+    <!-- SDK de Firebase (v8 para máxima estabilidad en navegadores escolares) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -19,7 +19,7 @@
         
         #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
         .login-card { background: var(--panel); padding: 40px; border-radius: 20px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); text-align: center; }
-        input { padding: 15px; border-radius: 10px; border: 2px solid #334155; width: 280px; font-size: 1rem; margin-bottom: 15px; display: block; background: #0f172a; color: white; }
+        input { padding: 15px; border-radius: 10px; border: 2px solid #334155; width: 280px; font-size: 1rem; margin-bottom: 15px; display: block; background: #0f172a; color: white; text-align: center; }
         
         #game-container { display: none; gap: 30px; padding: 20px; max-width: 1200px; width: 95%; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
         #game-container.active { display: flex; }
@@ -27,57 +27,36 @@
         #board {
             display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
             gap: 8px; width: 600px; height: 600px; background: #334155; padding: 10px; border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
         }
 
-        .cell {
-            background: var(--cell-bg); color: #1e293b; border-radius: 8px; position: relative;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 5px; font-size: 0.65rem; font-weight: 900; text-align: center; box-sizing: border-box;
-        }
-
-        .center-space {
-            grid-column: 2 / 6; grid-row: 2 / 6; background: rgba(255,255,255,0.03);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px;
-        }
+        .cell { background: var(--cell-bg); color: #1e293b; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; font-size: 0.65rem; font-weight: 900; text-align: center; }
+        .center-space { grid-column: 2 / 6; grid-row: 2 / 6; background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px; }
 
         .token-container { display: flex; flex-wrap: wrap; gap: 3px; position: absolute; bottom: 5px; }
         .token { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff; }
 
         #ui-panel { width: 350px; background: var(--panel); padding: 25px; border-radius: 15px; display: flex; flex-direction: column; gap: 15px; }
-        .player-card { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-left: 8px solid transparent; }
-        .turn-active { background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent); }
+        .player-card { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border-left: 8px solid transparent; margin-bottom: 5px; }
+        .turn-active { background: rgba(99, 102, 241, 0.2); border: 2px solid var(--accent); }
 
-        button {
-            padding: 15px; font-size: 1rem; cursor: pointer; border: none; border-radius: 10px;
-            background: var(--accent); color: white; font-weight: bold; text-transform: uppercase;
-            box-shadow: 0 4px #4338ca;
-        }
+        button { padding: 15px; font-size: 1rem; cursor: pointer; border: none; border-radius: 10px; background: var(--accent); color: white; font-weight: bold; text-transform: uppercase; box-shadow: 0 4px #4338ca; }
         button:disabled { background: #475569; box-shadow: none; cursor: not-allowed; }
-        .btn-secondary { background: #475569; margin-top: 5px; font-size: 0.8rem; }
+        .btn-secondary { background: #475569; margin-top: 5px; font-size: 0.8rem; box-shadow: 0 4px #1e293b; }
 
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center;
-        }
-        .modal-content {
-            background: white; color: #1e293b; padding: 40px; border-radius: 20px;
-            width: 450px; max-height: 80vh; overflow-y: auto; text-align: center;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
+        .modal-content { background: white; color: #1e293b; padding: 40px; border-radius: 20px; width: 420px; text-align: center; }
         .modal-btn { background: var(--bg); color: white; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; border: none; width: 100%; font-weight: bold; }
-        .readme-text { text-align: left; font-size: 0.9rem; line-height: 1.5; color: #334155; }
-        .readme-text h3 { color: var(--accent); margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div id="login-screen">
     <div class="login-card">
-        <h1>🏦 CAPITALIZA-T</h1>
-        <p>Juego en línea (2 a 4 jugadores)</p>
-        <input type="text" id="room-input" placeholder="Código de Sala (ej: MAT4A)">
-        <input type="text" id="name-input" placeholder="Tu Nombre">
-        <button onclick="joinGame()">UNIRSE A LA SALA</button>
+        <h1>🏦 CAPITALIZA-T ONLINE</h1>
+        <p>Juego de 2 a 4 jugadores (v2.0 Corr.)</p>
+        <input type="text" id="room-input" placeholder="CÓDIGO SALA (ej: CURSO4A)">
+        <input type="text" id="name-input" placeholder="TU NOMBRE EXACTO">
+        <button onclick="joinGame()">ENTRAR A LA SALA</button>
     </div>
 </div>
 
@@ -91,39 +70,34 @@
     </div>
 
     <div id="ui-panel">
-        <h2 id="turn-indicator">Esperando jugadores...</h2>
+        <h2 id="turn-indicator">Esperando partida...</h2>
         <div id="players-list"></div>
         <button id="start-btn" style="display:none; background:#22c55e;" onclick="startGame()">INICIAR PARTIDA 🏁</button>
         <button id="roll-btn" onclick="rollDice()" disabled>LANZAR DADOS 🎲</button>
-        <button class="btn-secondary" onclick="toggleReadme(true)">📖 INSTRUCCIONES</button>
+        <button class="btn-secondary" onclick="toggleReadme(true)">📖 REGLAS (README)</button>
     </div>
 </div>
 
 <div id="modal-decision" class="modal-overlay">
     <div class="modal-content">
         <h2 id="m-title"></h2>
-        <div id="m-desc" style="margin: 15px 0;"></div>
+        <div id="m-desc" style="margin: 20px 0; font-weight: 500;"></div>
         <div id="m-options"></div>
     </div>
 </div>
 
 <div id="modal-readme" class="modal-overlay">
-    <div class="modal-content">
-        <h2>📜 REGLAS DEL JUEGO</h2>
-        <div class="readme-text">
-            <h3>🎯 Objetivo</h3>
-            <p>Llegar al <strong>mes 60</strong> con el mayor <strong>Patrimonio Neto</strong> (Saldo + AFP - Deudas). El sistema simula el 10% obligatorio de tu sueldo para la AFP en cada vuelta [6, 7].</p>
-            <h3>🏦 Créditos</h3>
-            <p>Usa la <strong>Regla del 25%</strong>: tu cuota no debe superar la cuarta parte de tu saldo tras pagar vivienda [1, 2].</p>
-            <h3>📈 AFP</h3>
-            <p>A tu edad (18-20), el <strong>Fondo A</strong> ofrece mayor rentabilidad proyectada [5, 6].</p>
-        </div>
-        <button class="modal-btn" onclick="toggleReadme(false)">CERRAR</button>
+    <div class="modal-content" style="text-align: left;">
+        <h2 style="text-align: center;">📜 REGLAS DEL JUEGO</h2>
+        <p><strong>Meta:</strong> Llegar al mes 60 con el mayor Patrimonio Neto (Saldo + AFP - Deudas).</p>
+        <p><strong>Endeudamiento:</strong> No pidas créditos si la cuota supera el <strong>25% de tu ingreso líquido</strong>.</p>
+        <p><strong>AFP:</strong> Elige multifondos según tu riesgo. El <strong>Fondo A</strong> crece más a largo plazo.</p>
+        <button class="modal-btn" onclick="toggleReadme(false)">VOLVER</button>
     </div>
 </div>
 
 <script>
-    // --- TU CONFIGURACIÓN DE FIREBASE ---
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyCygRQQdJVDMBWICWQmHhaNNC89xu5xviQ",
       authDomain: "financiera-4fb83.firebaseapp.com",
@@ -141,47 +115,61 @@
     let roomCode, myName, myId, isHost = false;
     const CASILLAS = [
         { n: "INICIO", type: "gain", amt: 600000, icon: "🚀" },
-        { n: "Pago Arriendo", type: "pay", amt: 280000, icon: "🏠" },
-        { n: "Crédito Banco", type: "bank", icon: "🏦" },
-        { n: "Multifondos AFP", type: "afp", icon: "📈" },
-        { n: "Supermercado", type: "pay", amt: 90000, icon: "🛒" },
-        { n: "Cárcel Deuda", type: "event", icon: "🔒" },
-        { n: "Bono Estatal", type: "gain", amt: 50000, icon: "🎁" },
-        { n: "Ahorro Formal", type: "save", icon: "💰" },
-        { n: "Salida Ocio", type: "pay", amt: 40000, icon: "🍿" },
-        { n: "Defensa SERNAC", type: "event", icon: "🛡️" },
-        { n: "Servicios Básicos", type: "pay", amt: 50000, icon: "🚰" },
-        { n: "Día de Pago", type: "gain", amt: 600000, icon: "💵" },
+        { n: "Dividendo Vivienda", type: "pay", amt: 300000, icon: "🏠" },
+        { n: "Banco: Crédito", type: "bank", icon: "🏦" },
+        { n: "Estrategia AFP", type: "afp", icon: "📈" },
+        { n: "Gasto Alimentos", type: "pay", amt: 100000, icon: "🛒" },
+        { n: "Mora: Cárcel", type: "event", icon: "🔒" },
+        { n: "Bono Desempeño", type: "gain", amt: 80000, icon: "🎁" },
+        { n: "Ahorro Automático", type: "save", icon: "💰" },
+        { n: "Salida Social", type: "pay", amt: 45000, icon: "🍿" },
+        { n: "Reclamo SERNAC", type: "event", icon: "🛡️" },
+        { n: "Servicios Básico", type: "pay", amt: 60000, icon: "🚰" },
+        { n: "PAGO DE SUELDO", type: "gain", amt: 600000, icon: "💵" },
         { n: "Avance Efectivo", type: "bank", icon: "💳" },
-        { n: "Curso Capacitación", type: "save", icon: "📚" },
-        { n: "Reparación Hogar", type: "pay", amt: 120000, icon: "🔧" },
+        { n: "Capacitación", type: "save", icon: "📚" },
+        { n: "Emergencia PC", type: "pay", amt: 150000, icon: "🔧" },
         { n: "Rentabilidad AFP", type: "event", icon: "📊" },
-        { n: "Ahorro APV", type: "save", icon: "🌱" },
-        { n: "Vacaciones", type: "pay", amt: 300000, icon: "✈️" },
-        { n: "Seguro SIS", type: "event", icon: "🏥" },
-        { n: "Pie Vivienda", type: "save", icon: "🔑" }
+        { n: "Cuenta 2 / APV", type: "save", icon: "🌱" },
+        { n: "Viaje Amigos", type: "pay", amt: 300000, icon: "✈️" },
+        { n: "Seguro SIS / Salud", type: "event", icon: "🏥" },
+        { n: "Fondos para Pie", type: "save", icon: "🔑" }
     ];
 
     function joinGame() {
         roomCode = document.getElementById('room-input').value.toUpperCase().trim();
         myName = document.getElementById('name-input').value.trim();
-        if(!roomCode || !myName) return alert("Ingresa datos");
+        if(!roomCode || !myName) return alert("Faltan datos");
 
         const roomRef = db.ref('rooms/' + roomCode);
         roomRef.once('value', snapshot => {
-            let data = snapshot.val() || { players: {}, turn: 0, month: 1, started: false };
-            let pCount = Object.keys(data.players || {}).length;
-            if (pCount >= 4) return alert("Sala llena");
-            if (data.started) return alert("La partida ya comenzó");
+            let data = snapshot.val() || { players: {}, turn: 0, month: 1, started: false, playerOrder: [] };
+            let playersMap = data.players || {};
+            
+            // LÓGICA DE REINGRESO (REJOIN)
+            let existingId = Object.keys(playersMap).find(id => playersMap[id].name === myName);
+            
+            if (existingId) {
+                myId = existingId;
+                if (data.playerOrder && data.playerOrder === myId) isHost = true;
+            } else {
+                if (data.started) return alert("La partida ya comenzó con otros jugadores.");
+                let pCount = Object.keys(playersMap).length;
+                if (pCount >= 4) return alert("Sala llena.");
 
-            const newP = roomRef.child('players').push();
-            myId = newP.key;
-            if(pCount === 0) isHost = true;
+                const newP = roomRef.child('players').push();
+                myId = newP.key;
+                if(pCount === 0) isHost = true;
 
-            newP.set({
-                name: myName, pos: 0, money: 600000, afp: 50000, debt: 0,
-                color: ['#ef4444','#3b82f6','#eab308','#22c55e'][pCount]
-            });
+                newP.set({
+                    name: myName, pos: 0, money: 600000, afp: 50000, debt: 0,
+                    color: ['#ef4444','#3b82f6','#eab308','#22c55e'][pCount]
+                });
+
+                let newOrder = data.playerOrder || [];
+                newOrder.push(myId);
+                roomRef.update({ playerOrder: newOrder });
+            }
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('game-container').classList.add('active');
@@ -191,13 +179,12 @@
         });
     }
 
-    function startGame() {
-        db.ref('rooms/' + roomCode).update({ started: true });
-    }
+    function startGame() { db.ref('rooms/' + roomCode).update({ started: true }); }
 
     function startSync() {
         db.ref('rooms/' + roomCode).on('value', snapshot => {
             const data = snapshot.val();
+            if (!data) return;
             updateUI(data);
             updateTokens(data.players);
         });
@@ -205,27 +192,27 @@
 
     function updateUI(data) {
         const list = document.getElementById('players-list');
-        const pArr = Object.entries(data.players || {});
         list.innerHTML = "";
+        const order = data.playerOrder || [];
         
-        pArr.forEach(([id, p], index) => {
-            const isMyTurn = index === data.turn;
-            list.innerHTML += `<div class="player-card ${isMyTurn && data.started ? 'turn-active' : ''}" style="border-left-color:${p.color}">
-                <strong>${p.name}</strong> ${isMyTurn && data.started ? '⭐' : ''}<br>
-                💰 $${p.money.toLocaleString()} | 📈 AFP: $${p.afp.toLocaleString()}</div>`;
+        order.forEach((id, index) => {
+            const p = data.players[id];
+            if (!p) return;
+            const isTurn = index === data.turn;
             
-            if (isMyTurn && id === myId && data.started) {
-                document.getElementById('roll-btn').disabled = false;
-                document.getElementById('turn-indicator').innerText = "¡TU TURNO!";
-            } else if (data.started) {
-                document.getElementById('roll-btn').disabled = true;
-                document.getElementById('turn-indicator').innerText = "Turno de " + p.name;
+            list.innerHTML += `<div class="player-card ${isTurn && data.started ? 'turn-active' : ''}" style="border-left-color:${p.color}">
+                <strong>${p.name}</strong> ${isTurn && data.started ? '⭐' : ''}<br>
+                Saldo: $${p.money.toLocaleString()} | AFP: $${p.afp.toLocaleString()}</div>`;
+            
+            if (isTurn && data.started) {
+                document.getElementById('roll-btn').disabled = (id !== myId);
+                document.getElementById('turn-indicator').innerText = (id === myId) ? "¡TE TOCA!" : "Turno de " + p.name;
             }
         });
 
         if(!data.started) {
-            document.getElementById('turn-indicator').innerText = "ESPERANDO JUGADORES...";
-            if(isHost && pArr.length >= 2) document.getElementById('start-btn').style.display = "block";
+            document.getElementById('turn-indicator').innerText = "SALA DE ESPERA...";
+            if(isHost && order.length >= 2) document.getElementById('start-btn').style.display = "block";
         } else {
             document.getElementById('start-btn').style.display = "none";
         }
@@ -233,11 +220,15 @@
     }
 
     function rollDice() {
+        document.getElementById('roll-btn').disabled = true; // Anti-spam
         const dice = Math.floor(Math.random() * 6) + 1;
         document.getElementById('dice-anim').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1];
+        
         const ref = db.ref('rooms/' + roomCode);
         ref.once('value', snap => {
             const d = snap.val();
+            if (d.playerOrder[d.turn] !== myId) return; // Validación de seguridad
+
             const p = d.players[myId];
             let newPos = (p.pos + dice) % 20;
             ref.child('players/' + myId).update({ pos: newPos });
@@ -250,26 +241,25 @@
             ref.child('players/' + myId).update({ money: p.money - cell.amt });
             setTimeout(() => next(ref, data), 1200);
         } else if(cell.type === "bank") {
-            const cap = (p.money / 4);
-            showDecision("🏦 BANCO", `Oferta: $200.000. Cuota: $22.000 x 12 meses.<br><b>Capacidad de pago: $${cap.toLocaleString()}</b>`, [
-                {t: "Aceptar", a: () => { ref.child('players/' + myId).update({ money: p.money + 200000, debt: p.debt + 264000 }); next(ref, data); }},
+            const cap = Math.max(0, (p.money / 4));
+            showDecision("🏦 BANCO CENTRAL", `Crédito: $250.000. Cuota: $28.000 x 10 meses.<br><b>Tu capacidad (25%): $${cap.toLocaleString()}</b>`, [
+                {t: "Aceptar", a: () => { ref.child('players/' + myId).update({ money: p.money + 250000, debt: p.debt + 280000 }); next(ref, data); }},
                 {t: "Rechazar", a: () => next(ref, data)}
             ]);
         } else if(cell.type === "afp") {
-            showDecision("📈 AFP", "¿Fondo A (Riesgo +) o Fondo E (Seguro)?", [
-                {t: "Fondo A", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 12000 }); next(ref, data); }},
-                {t: "Fondo E", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 4000 }); next(ref, data); }}
+            showDecision("📈 AFP: MULTIFONDOS", "¿Dónde inviertes este año?", [
+                {t: "Fondo A (Riesgo/Ganancia)", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 15000 }); next(ref, data); }},
+                {t: "Fondo E (Seguridad)", a: () => { ref.child('players/' + myId).update({ afp: p.afp + 4000 }); next(ref, data); }}
             ]);
         } else { next(ref, data); }
     }
 
     function next(ref, data) {
         document.getElementById('modal-decision').style.display = 'none';
-        let nPlayers = Object.keys(data.players).length;
-        let nIdx = (data.turn + 1) % nPlayers;
-        let nMonth = data.month;
-        if(nIdx === 0) nMonth++; 
-        ref.update({ turn: nIdx, month: nMonth });
+        let nTotal = data.playerOrder.length;
+        let nextIdx = (data.turn + 1) % nTotal;
+        let nMonth = (nextIdx === 0) ? data.month + 1 : data.month;
+        ref.update({ turn: nextIdx, month: nMonth });
     }
 
     function showDecision(title, desc, opts) {
@@ -288,9 +278,8 @@
         const mapping = ['1/1','1/2','1/3','1/4','1/5','1/6','2/6','3/6','4/6','5/6','6/6','6/5','6/4','6/3','6/2','6/1','5/1','4/1','3/1','2/1'];
         CASILLAS.forEach((c, i) => {
             const div = document.createElement('div');
-            div.className = 'cell';
-            div.style.gridArea = mapping[i].replace('/',' / ');
-            div.innerHTML = `<span>${c.icon}</span><br>${c.n}<div class="token-container" id="slot-${i}"></div>`;
+            div.className = 'cell'; div.style.gridArea = mapping[i].replace('/',' / ');
+            div.innerHTML = `<span style="font-size:1.1rem">${c.icon}</span><br>${c.n}<div class="token-container" id="slot-${i}"></div>`;
             board.appendChild(div);
         });
     }
