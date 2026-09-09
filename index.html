@@ -1,791 +1,162 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rumbo a la U — Simulador financiero</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<style>
-  :root{
-    --bg:#11141b;
-    --surface:#1b2029;
-    --surface-2:#242b3a;
-    --text:#f4f1ea;
-    --muted:#9aa0ae;
-    --good:#4fb286;
-    --warn:#e4572e;
-    --info:#f2a65a;
-    --line:rgba(244,241,234,0.10);
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:'Space Grotesk',sans-serif;
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,h3,.display{
-    font-family:'Fraunces',serif;
-    font-weight:600;
-    letter-spacing:-0.01em;
-    margin:0;
-  }
-  #app{
-    max-width:760px;
-    margin:0 auto;
-    padding:28px 20px 80px;
-  }
-  .top-row{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    gap:12px;
-    margin-bottom:22px;
-    flex-wrap:wrap;
-  }
-  .brand{
-    font-size:1.5rem;
-  }
-  .brand span{color:var(--info);}
-  .room-tag{
-    font-size:0.85rem;
-    color:var(--muted);
-  }
-  .room-tag b{color:var(--text);font-weight:600;letter-spacing:0.04em;}
-  .card{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:24px;
-    margin-bottom:18px;
-  }
-  .lede{
-    color:var(--muted);
-    font-size:0.98rem;
-    line-height:1.55;
-    max-width:60ch;
-  }
-  input[type=text]{
-    width:100%;
-    background:var(--surface-2);
-    border:1px solid var(--line);
-    color:var(--text);
-    font-family:'Space Grotesk',sans-serif;
-    font-size:1.05rem;
-    padding:12px 14px;
-    border-radius:9px;
-    margin-top:6px;
-  }
-  input[type=text]:focus{outline:2px solid var(--info);outline-offset:1px;}
-  label.field{
-    display:block;
-    font-size:0.85rem;
-    color:var(--muted);
-    margin-bottom:14px;
-  }
-  .btn{
-    display:inline-block;
-    background:var(--info);
-    color:#1b1305;
-    border:none;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:0.98rem;
-    padding:12px 20px;
-    border-radius:9px;
-    cursor:pointer;
-    transition:transform .12s ease, filter .12s ease;
-  }
-  .btn:hover{filter:brightness(1.08);}
-  .btn:active{transform:scale(0.98);}
-  .btn.secondary{
-    background:transparent;
-    color:var(--text);
-    border:1px solid var(--line);
-  }
-  .btn.block{width:100%;text-align:center;}
-  .btn:disabled{opacity:0.35;cursor:not-allowed;filter:none;}
-  .row{display:flex;gap:12px;flex-wrap:wrap;}
-  .row > *{flex:1;}
-  .choice-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:10px;
-    margin:14px 0 18px;
-  }
-  .choice{
-    background:var(--surface-2);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:14px;
-    cursor:pointer;
-    text-align:left;
-    color:var(--text);
-    font-family:'Space Grotesk',sans-serif;
-  }
-  .choice strong{display:block;font-size:0.95rem;margin-bottom:3px;}
-  .choice small{color:var(--muted);}
-  .choice.selected{border-color:var(--info);background:rgba(242,166,90,0.12);}
-  .choice:disabled{opacity:0.4;cursor:not-allowed;}
-  /* Route / timeline */
-  .route{
-    display:flex;
-    align-items:center;
-    overflow-x:auto;
-    padding:18px 4px 8px;
-    gap:0;
-  }
-  .route-seg{
-    display:flex;
-    align-items:center;
-    flex:1;
-    min-width:44px;
-  }
-  .route-node{
-    width:34px;height:34px;border-radius:50%;
-    background:var(--surface-2);
-    border:2px solid var(--line);
-    display:flex;align-items:center;justify-content:center;
-    font-size:0.78rem;font-weight:600;color:var(--muted);
-    flex-shrink:0;
-    position:relative;
-  }
-  .route-node.done{background:var(--good);border-color:var(--good);color:#0c1f16;}
-  .route-node.current{background:var(--info);border-color:var(--info);color:#1b1305;box-shadow:0 0 0 4px rgba(242,166,90,0.22);}
-  .route-line{height:2px;background:var(--line);flex:1;}
-  .route-line.done{background:var(--good);}
-  .route-caption{
-    display:flex;justify-content:space-between;
-    font-size:0.72rem;color:var(--muted);padding:0 4px 4px;
-  }
-  /* Players strip */
-  .players-strip{display:flex;flex-direction:column;gap:8px;}
-  .player-row{
-    display:flex;align-items:center;gap:10px;
-    background:var(--surface-2);
-    border-radius:10px;
-    padding:10px 14px;
-    border-left:3px solid var(--line);
-  }
-  .player-row.turn{border-left-color:var(--info);}
-  .player-name{font-weight:600;flex:0 0 110px;font-size:0.92rem;}
-  .stat{font-size:0.78rem;color:var(--muted);white-space:nowrap;}
-  .stat b{color:var(--text);}
-  .bar-wrap{flex:1;height:6px;background:var(--line);border-radius:4px;overflow:hidden;min-width:50px;}
-  .bar{height:100%;background:var(--good);}
-  .bar.low{background:var(--warn);}
-  .pill{
-    display:inline-block;
-    font-size:0.72rem;
-    padding:3px 9px;
-    border-radius:999px;
-    background:rgba(79,178,134,0.15);
-    color:var(--good);
-    border:1px solid rgba(79,178,134,0.3);
-  }
-  .pill.warn{background:rgba(228,87,46,0.14);color:var(--warn);border-color:rgba(228,87,46,0.3);}
-  .event-title{font-size:1.3rem;margin-bottom:6px;}
-  .event-body{color:var(--text);line-height:1.6;margin:10px 0 4px;font-size:0.98rem;}
-  .fact{
-    background:rgba(242,166,90,0.10);
-    border:1px solid rgba(242,166,90,0.28);
-    border-radius:10px;
-    padding:12px 14px;
-    font-size:0.88rem;
-    color:var(--text);
-    margin-top:14px;
-  }
-  .fact b{color:var(--info);}
-  .waiting{
-    text-align:center;
-    color:var(--muted);
-    padding:20px 0;
-    font-size:0.95rem;
-  }
-  .feedback{
-    margin-top:14px;
-    padding:12px 14px;
-    border-radius:10px;
-    background:var(--surface-2);
-    font-size:0.9rem;
-    line-height:1.5;
-  }
-  table.results{width:100%;border-collapse:collapse;margin-top:10px;}
-  table.results th, table.results td{
-    text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);font-size:0.9rem;
-  }
-  table.results th{color:var(--muted);font-weight:500;font-size:0.78rem;}
-  .rank1{color:var(--info);font-weight:700;}
-  .hidden{display:none !important;}
-  .error-text{color:var(--warn);font-size:0.85rem;margin-top:8px;}
-  .code-display{
-    font-family:'Space Grotesk',sans-serif;
-    font-size:2.4rem;
-    font-weight:700;
-    letter-spacing:0.12em;
-    color:var(--info);
-    margin:6px 0 4px;
-  }
-  footer.tip{
-    text-align:center;color:var(--muted);font-size:0.78rem;margin-top:26px;line-height:1.6;
-  }
-  @media (max-width:480px){
-    .player-name{flex-basis:80px;font-size:0.82rem;}
-    .code-display{font-size:1.9rem;}
-  }
-</style>
+    <meta charset="UTF-8">
+    <title>Ruta 2027: Carrera de Obstáculos Financieros</title>
+    <style>
+        :root { --blue: #2c3e50; --green: #27ae60; --red: #e74c3c; --yellow: #f1c40f; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; overflow-x: hidden; }
+        #game-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+        header { background: var(--blue); color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        #track-area { flex-grow: 1; position: relative; background: #fff; overflow-x: auto; white-space: nowrap; padding: 50px 0; }
+        .lane { height: 80px; border-bottom: 2px dashed #ccc; position: relative; width: 5000px; display: flex; align-items: center; }
+        .lane-label { position: sticky; left: 10px; background: rgba(255,255,255,0.8); padding: 5px; z-index: 10; font-weight: bold; border-radius: 5px; }
+        
+        .runner { width: 50px; height: 50px; position: absolute; left: 0; transition: left 0.5s linear; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 5; }
+        
+        .hurdle { position: absolute; width: 40px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: 20px; border-left: 3px solid; }
+        .hurdle.credit { border-color: var(--red); color: var(--red); }
+        .hurdle.save { border-color: var(--green); color: var(--green); }
+        .hurdle.inst { border-color: var(--blue); color: var(--blue); }
+        .hurdle-label { font-size: 10px; transform: rotate(-45deg); margin-bottom: 60px; }
+
+        #ui-panel { background: #eee; padding: 15px; display: flex; justify-content: space-around; border-top: 2px solid #ddd; }
+        .stat-card { background: white; padding: 10px; border-radius: 8px; border: 1px solid #ccc; min-width: 150px; }
+        
+        #decision-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 100; max-width: 400px; text-align: center; }
+        .btn { padding: 10px 20px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; font-weight: bold; }
+        .btn-primary { background: var(--blue); }
+        .btn-success { background: var(--green); }
+    </style>
 </head>
 <body>
-<div id="app"></div>
+
+<header>
+    <h1>🏁 RUTA 2027: El Gran Obstáculo Financiero (5 Años)</h1>
+    <p>Objetivo: Llegar al mes 60 con capacidad para el "Pie" de tu vivienda</p>
+</header>
+
+<div id="track-area">
+    <!-- Generado por JS -->
+</div>
+
+<div id="ui-panel">
+    <div class="stat-card"><strong>Mes:</strong> <span id="current-month">1</span>/60</div>
+    <div class="stat-card"><strong>Saldo:</strong> $<span id="balance">0</span></div>
+    <div class="stat-card"><strong>Carga Financiera:</strong> <span id="debt-load">0</span>%</div>
+    <div class="stat-card"><strong>AFP Acumulado:</strong> $<span id="afp-total">0</span></div>
+</div>
+
+<div id="decision-modal">
+    <h3 id="modal-title">⚠️ ¡IMPREVISTO!</h3>
+    <p id="modal-text">Tu notebook ha muerto. Necesitas $850.000 para Ingeniería.</p>
+    <div id="modal-options"></div>
+</div>
 
 <script>
-/* ---------------- Firebase ---------------- */
-const firebaseConfig = {
-  apiKey: "AIzaSyCygRQQdJVDMBWICWQmHhaNNC89xu5xviQ",
-  authDomain: "financiera-4fb83.firebaseapp.com",
-  databaseURL: "https://financiera-4fb83-default-rtdb.firebaseio.com",
-  projectId: "financiera-4fb83",
-  storageBucket: "financiera-4fb83.firebasestorage.app",
-  messagingSenderId: "336849737350",
-  appId: "1:336849737350:web:710f4445e0a217b6d42307"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-/* ---------------- Utilidades ---------------- */
-const money = n => "$" + Math.round(n).toLocaleString("es-CL");
-const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
-function uid(){
-  let id = localStorage.getItem("rutau_uid");
-  if(!id){ id = "p" + Math.random().toString(36).slice(2,10); localStorage.setItem("rutau_uid",id); }
-  return id;
-}
-function makeRoomCode(){ return String(Math.floor(1000 + Math.random()*9000)); }
-
-/* ---------------- Datos de juego ---------------- */
-const ARRIENDO = {
-  solo:{label:"Arriendo solo/a", desc:"Más privacidad, más gasto fijo.", costo:180000},
-  compartido:{label:"Arriendo compartido", desc:"Compartes gastos con roommates.", costo:100000}
-};
-const MOVILIZACION = {
-  auto:{label:"Auto propio", desc:"Cómodo, pero bencina y mantención pesan.", costo:60000},
-  publico:{label:"Transporte público", desc:"Bip! o similar, costo moderado.", costo:25000},
-  activa:{label:"Bici o caminando", desc:"Casi sin costo, depende de la distancia.", costo:6000}
-};
-const MATERIALES = 40000; // gasto fijo mensual en materiales/fotocopias/app universidad
-
-const EVENTS = [
-  null, // índice 0 no se usa (0 = mes de instalación/setup)
-  { // Ronda 1
-    title:"Llega tu primer ingreso del mes",
-    body:(p)=>`Ya instalado en tu nueva ciudad, te llega tu primera mesada${p.trabaja? " más tu sueldo part-time":""}. Ingreso: <b>${money(p.ingreso)}</b>. Gastos fijos (arriendo + movilización + materiales): <b>${money(p.gastosFijos)}</b>. Lo que te queda libre este mes: <b>${money(Math.max(p.ingreso-p.gastosFijos,0))}</b>.`,
-    options:[
-      { label:"Aparto un ahorro automático apenas me llega la plata",
-        sub:"Antes de gastar en cualquier otra cosa",
-        apply:(p)=>{ const libre=Math.max(p.ingreso-p.gastosFijos,0); const ahorro=Math.round(libre*0.6);
-          return {ahorro:p.ahorro+ahorro, salud:clamp(p.salud+5,0,100), conocimiento:p.conocimiento+15,
-            feedback:`Guardaste ${money(ahorro)}. "Pagarte a ti mismo primero" es una de las bases del equilibrio financiero: ahorrar antes de gastar, no con lo que sobra.`}; } },
-      { label:"Gasto el saldo libre según se vaya necesitando",
-        sub:"Sin un plan fijo de ahorro",
-        apply:(p)=>({ahorro:p.ahorro, salud:p.salud, conocimiento:p.conocimiento,
-          feedback:"Sin un plan, es fácil que el saldo libre se disuelva en gastos pequeños y no quede nada para imprevistos."}) }
-    ]
-  },
-  { // Ronda 2
-    title:"Imprevisto: se te rompe el notebook",
-    body:(p)=>`Lo necesitas para tareas y necesitas <b>${money(250000)}</b> ahora. Tu ahorro actual es ${money(p.ahorro)}.`,
-    options:[
-      { label:"Uso mi fondo de ahorro",
-        sub:"Sin generar deuda ni intereses",
-        enabled:(p)=>p.ahorro>=250000,
-        disabledMsg:"Necesitas al menos $250.000 ahorrados para esta opción",
-        apply:(p)=>({ahorro:p.ahorro-250000, salud:clamp(p.salud+10,0,100), conocimiento:p.conocimiento+10,
-          feedback:"Evitaste pagar intereses: para eso sirve un fondo de emergencia."}) },
-      { label:"Pido un crédito de consumo",
-        sub:"CAE aproximado de 35% anual",
-        apply:(p)=>({deuda:p.deuda+300000, salud:clamp(p.salud-5,0,100), conocimiento:p.conocimiento+10,
-          feedback:"El CAE (Carga Anual Equivalente) muestra el costo real de un crédito, incluyendo intereses y gastos asociados: pagarás bastante más que los $250.000 originales."}) },
-      { label:"Lo pago en cuotas con tarjeta, sin revisar la tasa",
-        sub:"\"Después lo veo\"",
-        apply:(p)=>({deuda:p.deuda+320000, salud:clamp(p.salud-10,0,100), conocimiento:clamp(p.conocimiento-5,0,999),
-          feedback:"No revisar la tasa de interés antes de endeudarte suele salir caro: la tarjeta de crédito sin plan de pago es una de las deudas más caras que existen."}) }
-    ]
-  },
-  { // Ronda 3
-    title:"Te ofrecen un trabajo part-time los fines de semana",
-    body:(p)=>`Sumaría cerca de ${money(80000)} extra al mes a tu ingreso.`,
-    options:[
-      { label:"Acepto y empiezo a cotizar en mi AFP",
-        sub:"Construyo mi futura pensión desde ahora",
-        apply:(p)=>({ingreso:p.ingreso+80000, ahorro:p.ahorro+20000, salud:clamp(p.salud+5,0,100), conocimiento:p.conocimiento+20, trabaja:true,
-          feedback:"Cotizar desde joven aprovecha el interés compuesto: los fondos que entran ahora a tu AFP tienen más años para crecer antes de tu jubilación."}) },
-      { label:"No acepto, prefiero enfocarme solo en estudiar",
-        sub:"Menos ingreso, menos estrés",
-        apply:(p)=>({salud:clamp(p.salud+5,0,100), conocimiento:p.conocimiento+5,
-          feedback:"Es una decisión válida: no cotizar ahora significa construir esa base de pensión más adelante."}) }
-    ]
-  },
-  { // Ronda 4
-    title:"Fin de semestre: viaje a visitar a tu familia",
-    body:(p)=>`Los pasajes de ida y vuelta cuestan ${money(80000)}.`,
-    options:[
-      { label:"Pago con mi ahorro",
-        sub:"Uso lo que ya tenía guardado",
-        apply:(p)=>{ const nuevoAhorro=Math.max(p.ahorro-80000,0); const faltante=Math.max(80000-p.ahorro,0);
-          return {ahorro:nuevoAhorro, deuda:p.deuda+faltante, salud:clamp(p.salud + (faltante>0?-8:5),0,100), conocimiento:p.conocimiento+5,
-            feedback: faltante>0? `No te alcanzaba todo el ahorro, así que ${money(faltante)} quedaron como deuda pendiente.` : "Usaste tu colchón de ahorro sin generar deuda."}; } },
-      { label:"Pago con tarjeta y dejo la deuda \"rotando\"",
-        sub:"No pago el total el próximo mes",
-        apply:(p)=>({deuda:p.deuda+90000, salud:clamp(p.salud-10,0,100), conocimiento:clamp(p.conocimiento-5,0,999), tarjetaRotando:true,
-          feedback:"Al no pagar el total de la tarjeta, el saldo queda \"rotando\" y genera intereses el próximo mes: por eso la tarjeta de crédito es cara si no se paga completa."}) }
-    ]
-  },
-  { // Ronda 5
-    title:"¿Sabías qué...? — El sistema financiero también te protege",
-    body:(p)=>`¿Qué institución fiscaliza a los bancos y otras entidades financieras en Chile?`,
-    options:[
-      { label:"La CMF (Comisión para el Mercado Financiero)",
-        sub:"Correcto",
-        apply:(p)=>({salud:clamp(p.salud+5,0,100), conocimiento:p.conocimiento+15,
-          feedback:"¡Correcto! La CMF fiscaliza bancos, aseguradoras y el mercado de valores. El SERNAC Financiero protege tus derechos como consumidor de productos financieros, y el Banco Central se encarga de la política monetaria y mantener la inflación baja y estable — cada uno cumple un rol distinto."}) },
-      { label:"El Banco Central",
-        sub:"No es su rol principal",
-        apply:(p)=>({conocimiento:p.conocimiento+8,
-          feedback:"El Banco Central se enfoca en la política monetaria (tasas de interés, inflación), no en fiscalizar bancos día a día. Esa función es de la CMF. El SERNAC Financiero, en tanto, protege tus derechos como consumidor."}) },
-      { label:"El SERNAC",
-        sub:"Cercano, pero no es esta función",
-        apply:(p)=>({conocimiento:p.conocimiento+8,
-          feedback:"El SERNAC (y su unidad SERNAC Financiero) protege tus derechos como consumidor y recibe reclamos, pero quien fiscaliza directamente a los bancos es la CMF."}) }
-    ],
-    extra:(p)=>{
-      if(p.tarjetaRotando && !p.tarjetaInteresCobrado){
-        const interes = Math.round(p.deuda*0.03)+5000;
-        return {deuda:p.deuda+interes, salud:clamp(p.salud-5,0,100), tarjetaInteresCobrado:true,
-          note:`Además, como dejaste tu tarjeta "rotando" el mes pasado, se sumaron ${money(interes)} de interés a tu deuda.`};
-      }
-      return null;
-    }
-  },
-  { // Ronda 6
-    title:"Años después: ¿comprar tu primer departamento?",
-    body:(p)=>`Ya titulado, piensas en tu primera vivienda. Para un crédito hipotecario normalmente necesitas ahorrar un <b>pie</b> (10%-20% del valor), y el resto se paga en <b>dividendos</b> mensuales durante 20-30 años, con interés. Buen historial financiero y ahorro constante ayudan a acceder a mejores condiciones.`,
-    options:[
-      { label:"Abro una cuenta de Ahorro Previsional Voluntario (APV)",
-        sub:"Complementa tu futura pensión y da beneficios tributarios",
-        apply:(p)=>({ahorro:p.ahorro+10000, salud:clamp(p.salud+5,0,100), conocimiento:p.conocimiento+20,
-          feedback:"El APV es un ahorro adicional a la AFP, con incentivos tributarios, pensado para mejorar tu pensión futura o cubrir metas de largo plazo."}) },
-      { label:"Prefiero no pensar en eso todavía",
-        sub:"Ya llegará con el tiempo",
-        apply:(p)=>({conocimiento:p.conocimiento+5,
-          feedback:"Está bien no decidirlo todo ahora, pero mientras antes conozcas estas herramientas, más opciones tendrás más adelante."}) }
-    ]
-  }
-];
-const TOTAL_ROUNDS = EVENTS.length - 1;
-
-/* ---------------- Estado local ---------------- */
-let ROOM_CODE = null;
-let ME = uid();
-let roomRef = null;
-let state = { room:null };
-let selectedSetup = { arriendo:null, movilizacion:null, trabaja:false };
-let pendingChoice = null;
-
-/* ---------------- Render root ---------------- */
-const app = document.getElementById("app");
-
-function header(subtitle){
-  return `<div class="top-row">
-    <h1 class="brand">Rumbo a <span>la U</span></h1>
-    ${ROOM_CODE? `<div class="room-tag">Sala <b>${ROOM_CODE}</b>${subtitle? " · "+subtitle:""}</div>`:""}
-  </div>`;
-}
-
-function renderHome(){
-  app.innerHTML = `
-    ${header()}
-    <div class="card">
-      <h2>Simulador financiero para tu primer año universitario</h2>
-      <p class="lede">Juega hasta con 4 personas, cada una desde su propio computador. Dura unos 25-30 minutos y toca decisiones reales: arriendo, movilización, tarjeta de crédito, créditos, ahorro, AFP/APV y las instituciones que cuidan tus derechos como consumidor financiero.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:14px;">Crear una sala nueva</h3>
-      <label class="field">Tu nombre
-        <input type="text" id="nameCreate" placeholder="Ej: Camila" maxlength="18">
-      </label>
-      <button class="btn block" id="btnCreate">Crear sala</button>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:14px;">Unirse a una sala</h3>
-      <div class="row">
-        <label class="field">Código de sala
-          <input type="text" id="codeJoin" placeholder="0000" maxlength="4" inputmode="numeric">
-        </label>
-        <label class="field">Tu nombre
-          <input type="text" id="nameJoin" placeholder="Ej: Pedro" maxlength="18">
-        </label>
-      </div>
-      <button class="btn secondary block" id="btnJoin">Unirse</button>
-      <div class="error-text hidden" id="joinError"></div>
-    </div>
-    <footer class="tip">Los datos de la partida (nombres y decisiones) son visibles para quien tenga el código de sala — pensado para jugarse en clase.</footer>
-  `;
-  document.getElementById("btnCreate").onclick = onCreateRoom;
-  document.getElementById("btnJoin").onclick = onJoinRoom;
-}
-
-function onCreateRoom(){
-  const name = document.getElementById("nameCreate").value.trim();
-  if(!name) return;
-  const code = makeRoomCode();
-  ROOM_CODE = code;
-  const now = Date.now();
-  db.ref("rooms/"+code).set({
-    createdAt: now,
-    phase:"lobby",
-    round:0,
-    currentIndex:0,
-    order:[],
-    players:{
-      [ME]:{ name, joinOrder:0, ready:false, joinedAt:now }
-    }
-  }).then(()=>{ attachRoom(code); });
-}
-
-function onJoinRoom(){
-  const code = document.getElementById("codeJoin").value.trim();
-  const name = document.getElementById("nameJoin").value.trim();
-  const errEl = document.getElementById("joinError");
-  errEl.classList.add("hidden");
-  if(!code || !name) return;
-  db.ref("rooms/"+code).once("value").then(snap=>{
-    const val = snap.val();
-    if(!val){ errEl.textContent="No existe una sala con ese código."; errEl.classList.remove("hidden"); return; }
-    if(val.phase!=="lobby"){ errEl.textContent="Esa partida ya comenzó."; errEl.classList.remove("hidden"); return; }
-    const players = val.players || {};
-    if(players[ME]){ ROOM_CODE=code; attachRoom(code); return; }
-    const count = Object.keys(players).length;
-    if(count>=4){ errEl.textContent="Esa sala ya tiene 4 jugadores."; errEl.classList.remove("hidden"); return; }
-    db.ref("rooms/"+code+"/players/"+ME).set({ name, joinOrder:count, ready:false, joinedAt:Date.now() })
-      .then(()=>{ ROOM_CODE=code; attachRoom(code); });
-  });
-}
-
-function attachRoom(code){
-  roomRef = db.ref("rooms/"+code);
-  roomRef.on("value", snap=>{
-    state.room = snap.val();
-    render();
-  });
-}
-
-/* ---------------- Render dispatcher ---------------- */
-function render(){
-  const room = state.room;
-  if(!room){ renderHome(); return; }
-  if(room.phase==="lobby") return renderLobby(room);
-  if(room.phase==="setup") return renderSetup(room);
-  if(room.phase==="playing") return renderPlaying(room);
-  if(room.phase==="results") return renderResults(room);
-}
-
-function playersSorted(room){
-  return Object.entries(room.players||{})
-    .map(([id,p])=>({id,...p}))
-    .sort((a,b)=>(a.joinOrder??0)-(b.joinOrder??0));
-}
-
-/* ---------------- Lobby ---------------- */
-function renderLobby(room){
-  const players = playersSorted(room);
-  const isHost = players[0] && players[0].id===ME;
-  app.innerHTML = `
-    ${header("sala de espera")}
-    <div class="card">
-      <p class="lede" style="margin-bottom:2px;">Comparte este código con el resto:</p>
-      <div class="code-display">${ROOM_CODE}</div>
-      <p class="lede">Cada jugador entra desde su propio computador con este código.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:12px;">Jugadores en la sala (${players.length}/4)</h3>
-      <div class="players-strip">
-        ${players.map(p=>`<div class="player-row"><span class="player-name">${p.name}</span>${p.id===players[0].id? '<span class="pill">Anfitrión/a</span>':''}</div>`).join("")}
-      </div>
-      ${isHost? `<button class="btn block" style="margin-top:16px;" id="btnStart" ${players.length<2?"disabled":""}>Comenzar partida</button>
-        ${players.length<2? '<p class="lede" style="margin-top:8px;">Se necesitan al menos 2 jugadores.</p>':''}`
-        : `<p class="waiting">Esperando a que el anfitrión/a comience la partida…</p>`}
-    </div>
-  `;
-  if(isHost){
-    const btn = document.getElementById("btnStart");
-    if(btn) btn.onclick = ()=> roomRef.update({ phase:"setup" });
-  }
-}
-
-/* ---------------- Setup (mes 0) ---------------- */
-function renderSetup(room){
-  const players = playersSorted(room);
-  const me = room.players[ME];
-  const allReady = players.every(p=>p.ready);
-  const isHost = players[0] && players[0].id===ME;
-
-  if(me && me.ready){
-    app.innerHTML = `
-      ${header("preparando tu llegada")}
-      <div class="card">
-        <h2>¡Listo, ${me.name}!</h2>
-        <p class="lede">Esperando a que el resto termine de elegir su situación inicial.</p>
-      </div>
-      <div class="card">
-        <div class="players-strip">
-          ${players.map(p=>`<div class="player-row"><span class="player-name">${p.name}</span>${p.ready?'<span class="pill">Listo</span>':'<span class="pill warn">Eligiendo…</span>'}</div>`).join("")}
-        </div>
-        ${isHost? `<button class="btn block" style="margin-top:16px;" id="btnGo" ${allReady?"":"disabled"}>Empezar el juego</button>`:""}
-      </div>
-    `;
-    if(isHost){
-      const btn = document.getElementById("btnGo");
-      if(btn) btn.onclick = startPlaying;
-    }
-    return;
-  }
-
-  app.innerHTML = `
-    ${header("mes 0 · instalándote")}
-    <div class="card">
-      <h2>Acabas de llegar a tu nueva ciudad</h2>
-      <p class="lede">Antes de tu primer mes como universitario/a, define tu situación. Esto fija tus gastos fijos para el resto del juego.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:10px;">¿Dónde vivirás?</h3>
-      <div class="choice-grid" id="grpArriendo">
-        ${Object.entries(ARRIENDO).map(([k,v])=>`
-          <button class="choice" data-k="${k}" data-grp="arriendo">
-            <strong>${v.label}</strong>
-            <small>${v.desc}<br>${money(v.costo)}/mes</small>
-          </button>`).join("")}
-      </div>
-      <h3 style="margin-bottom:10px;">¿Cómo te moverás?</h3>
-      <div class="choice-grid" id="grpMovilizacion">
-        ${Object.entries(MOVILIZACION).map(([k,v])=>`
-          <button class="choice" data-k="${k}" data-grp="movilizacion">
-            <strong>${v.label}</strong>
-            <small>${v.desc}<br>${money(v.costo)}/mes</small>
-          </button>`).join("")}
-      </div>
-      <h3 style="margin-bottom:10px;">Tu ingreso mensual base</h3>
-      <div class="choice-grid" id="grpTrabajo">
-        <button class="choice" data-k="no" data-grp="trabajo">
-          <strong>Solo mesada familiar</strong>
-          <small>${money(150000)}/mes</small>
-        </button>
-        <button class="choice" data-k="si" data-grp="trabajo">
-          <strong>Mesada + trabajo part-time</strong>
-          <small>${money(150000)} + ${money(80000)}/mes, y cotizas AFP</small>
-        </button>
-      </div>
-      <button class="btn block" id="btnReady" disabled>Confirmar y quedar listo/a</button>
-    </div>
-  `;
-  document.querySelectorAll(".choice").forEach(btn=>{
-    btn.onclick = ()=>{
-      const grp = btn.dataset.grp, k = btn.dataset.k;
-      selectedSetup[grp] = k;
-      document.querySelectorAll(`[data-grp="${grp}"]`).forEach(b=>b.classList.toggle("selected", b===btn));
-      const ok = selectedSetup.arriendo && selectedSetup.movilizacion && selectedSetup.trabajo!==null && selectedSetup.trabajo!==undefined;
-      document.getElementById("btnReady").disabled = !ok;
+    const CONFIG = {
+        totalMonths: 60,
+        baseIncome: 500000,
+        fixedExpenses: 350000, // Arriendo y comida
+        hurdles: [
+            { month: 5, type: 'credit', title: '💻 Notebook quemado', text: '¿Cómo pagas los $850.000?', options: [
+                { text: 'Tarjeta (12 cuotas, CAE 35%)', impact: -85000, debt: 12 },
+                { text: 'Ahorro (Usar fondo emergencia)', impact: -400000, debt: 0 }
+            ]},
+            { month: 12, type: 'inst', title: '🏦 Trivia CMF', text: '¿Quién regula las tarjetas de retail?', options: [
+                { text: 'CMF (Correcto +$50k)', impact: 50000 },
+                { text: 'Banco Central (Incorrecto)', impact: 0 }
+            ]},
+            { month: 24, type: 'save', title: '📈 Bono Desempeño', text: 'Recibes $200.000 extra.', options: [
+                { text: 'Ahorro en Cuenta 2 (AFP)', impact: 200000, afp: true },
+                { text: 'Viaje con amigos', impact: 0 }
+            ]},
+            { month: 36, type: 'credit', title: '🏥 Urgencia Médica', text: 'Cuenta de $1.200.000.', options: [
+                { text: 'Préstamo Fonasa (5% sueldo)', impact: -25000, debt: 24 },
+                { text: 'Avance en Efectivo', impact: -120000, debt: 12 }
+            ]},
+            { month: 55, type: 'inst', title: '🏠 El Sueño del Pie', text: '¿Tienes el 20% para el departamento de UF 2.900?', options: [
+                { text: 'Evaluar mi ahorro', impact: 0 }
+            ]}
+        ]
     };
-  });
-  document.getElementById("btnReady").onclick = confirmSetup;
-}
 
-function confirmSetup(){
-  const trabaja = selectedSetup.trabajo==="si";
-  const ingreso = 150000 + (trabaja?80000:0);
-  const gastosFijos = ARRIENDO[selectedSetup.arriendo].costo + MOVILIZACION[selectedSetup.movilizacion].costo + MATERIALES;
-  db.ref(`rooms/${ROOM_CODE}/players/${ME}`).update({
-    ready:true, arriendo:selectedSetup.arriendo, movilizacion:selectedSetup.movilizacion,
-    trabaja, ingreso, gastosFijos, ahorro:0, deuda:0, salud:100, conocimiento:0, tarjetaRotando:false, tarjetaInteresCobrado:false
-  });
-}
+    let gameState = { month: 1, balance: 200000, afp: 0, currentDebt: 0, isPaused: false };
+    const trackArea = document.getElementById('track-area');
 
-function startPlaying(){
-  db.ref(`rooms/${ROOM_CODE}/players`).once("value").then(snap=>{
-    const players = playersSorted({players:snap.val()});
-    const order = players.map(p=>p.id);
-    roomRef.update({ phase:"playing", round:1, currentIndex:0, order });
-  });
-}
-
-/* ---------------- Playing ---------------- */
-function renderPlaying(room){
-  const players = playersSorted(room);
-  const order = room.order || players.map(p=>p.id);
-  const currentUid = order[room.currentIndex];
-  const currentPlayer = room.players[currentUid];
-  const round = room.round;
-  const ev = EVENTS[round];
-
-  app.innerHTML = `
-    ${header(`mes ${round} de ${TOTAL_ROUNDS}`)}
-    <div class="card">
-      ${renderRoute(round)}
-    </div>
-    <div class="card" id="eventCard"></div>
-    <div class="card">
-      <h3 style="margin-bottom:10px;">Jugadores</h3>
-      <div class="players-strip">
-        ${players.map(p=>renderPlayerRow(p, p.id===currentUid)).join("")}
-      </div>
-    </div>
-  `;
-  renderEventCard(ev, currentPlayer, currentUid, round, room);
-}
-
-function renderRoute(round){
-  let nodes = "";
-  for(let i=0;i<=TOTAL_ROUNDS;i++){
-    const nodeState = i<round? "done" : (i===round? "current" : "");
-    nodes += `<div class="route-seg">
-      <div class="route-node ${nodeState}">${i}</div>
-      ${i<TOTAL_ROUNDS? `<div class="route-line ${i<round?'done':''}"></div>`:""}
-    </div>`;
-  }
-  return `<div class="route">${nodes}</div>
-    <div class="route-caption"><span>Instalación</span><span>Titulado/a</span></div>`;
-}
-
-function renderPlayerRow(p, isTurn){
-  const salud = p.salud ?? 100;
-  return `<div class="player-row ${isTurn?'turn':''}">
-    <span class="player-name">${p.name}${isTurn?' 🎲':''}</span>
-    <span class="stat">Salud</span>
-    <div class="bar-wrap"><div class="bar ${salud<40?'low':''}" style="width:${salud}%"></div></div>
-    <span class="stat"><b>${money(p.ahorro||0)}</b> ahorro</span>
-    <span class="stat"><b>${money(p.deuda||0)}</b> deuda</span>
-  </div>`;
-}
-
-function renderEventCard(ev, currentPlayer, currentUid, round, room){
-  const card = document.getElementById("eventCard");
-  const isMyTurn = currentUid===ME;
-
-  if(!isMyTurn){
-    card.innerHTML = `
-      <h3 class="event-title">${ev.title}</h3>
-      <p class="event-body">${ev.body(currentPlayer)}</p>
-      <p class="waiting">Esperando a que <b>${currentPlayer.name}</b> tome su decisión…</p>
-    `;
-    return;
-  }
-
-  card.innerHTML = `
-    <h3 class="event-title">${ev.title}</h3>
-    <p class="event-body">${ev.body(currentPlayer)}</p>
-    <div class="choice-grid" id="evChoices">
-      ${ev.options.map((opt,i)=>{
-        const en = opt.enabled? opt.enabled(currentPlayer) : true;
-        return `<button class="choice" data-i="${i}" ${en?"":"disabled"}>
-          <strong>${opt.label}</strong>
-          <small>${en? (opt.sub||"") : (opt.disabledMsg||"No disponible")}</small>
-        </button>`;
-      }).join("")}
-    </div>
-  `;
-  document.querySelectorAll("#evChoices .choice").forEach(btn=>{
-    btn.onclick = ()=> resolveChoice(ev, currentPlayer, currentUid, round, room, parseInt(btn.dataset.i));
-  });
-}
-
-function resolveChoice(ev, player, currentUid, round, room, optIndex){
-  const opt = ev.options[optIndex];
-  const patch = opt.apply(player);
-  let feedback = patch.feedback || "";
-  let extraNote = "";
-  if(ev.extra){
-    const extra = ev.extra({...player, ...patch});
-    if(extra){
-      Object.assign(patch, extra);
-      extraNote = extra.note || "";
+    function initGame() {
+        const lane = document.createElement('div');
+        lane.className = 'lane';
+        lane.innerHTML = `<div class="lane-label">TU RUTA</div><div id="p1" class="runner">🏃</div>`;
+        
+        CONFIG.hurdles.forEach(h => {
+            const hDiv = document.createElement('div');
+            hDiv.className = `hurdle ${h.type}`;
+            hDiv.style.left = `${h.month * 80}px`;
+            hDiv.innerHTML = `<span class="hurdle-label">${h.title}</span><span>${h.type === 'credit' ? '💳' : h.type === 'save' ? '💰' : '🏦'}</span>`;
+            lane.appendChild(hDiv);
+        });
+        
+        trackArea.appendChild(lane);
+        gameLoop();
     }
-  }
-  delete patch.feedback;
 
-  // Mostrar feedback antes de avanzar
-  const card = document.getElementById("eventCard");
-  card.innerHTML += `<div class="feedback">${feedback}${extraNote? "<br>"+extraNote:""}</div>
-    <button class="btn block" style="margin-top:14px;" id="btnContinue">Continuar</button>`;
-  document.getElementById("btnContinue").onclick = ()=>{
-    db.ref(`rooms/${ROOM_CODE}/players/${currentUid}`).update(patch).then(()=>{
-      advanceTurn(room, round);
-    });
-  };
-}
+    function gameLoop() {
+        if (gameState.month > CONFIG.totalMonths || gameState.isPaused) return;
 
-function advanceTurn(room, round){
-  const order = room.order;
-  let nextIndex = room.currentIndex + 1;
-  let nextRound = round;
-  if(nextIndex >= order.length){
-    nextIndex = 0;
-    nextRound = round + 1;
-  }
-  if(nextRound > TOTAL_ROUNDS){
-    roomRef.update({ phase:"results" });
-  } else {
-    roomRef.update({ currentIndex: nextIndex, round: nextRound });
-  }
-}
+        // Lógica de mes automático (Equilibrio Financiero [1])
+        let monthlySurplus = CONFIG.baseIncome - CONFIG.fixedExpenses - gameState.currentDebt;
+        gameState.balance += monthlySurplus;
+        gameState.afp += CONFIG.baseIncome * 0.10; // Pilar contributivo [12]
 
-/* ---------------- Results ---------------- */
-function renderResults(room){
-  const players = playersSorted(room).map(p=>{
-    const puntaje = Math.round((p.salud||0) + (p.conocimiento||0)*2 + (p.ahorro||0)/20 - (p.deuda||0)/20);
-    return {...p, puntaje};
-  }).sort((a,b)=>b.puntaje-a.puntaje);
+        // Actualizar UI
+        document.getElementById('current-month').innerText = gameState.month;
+        document.getElementById('balance').innerText = gameState.balance.toLocaleString();
+        document.getElementById('afp-total').innerText = Math.floor(gameState.afp).toLocaleString();
+        document.getElementById('debt-load').innerText = Math.round((gameState.currentDebt / (CONFIG.baseIncome - 350000)) * 100);
+        
+        document.getElementById('p1').style.left = `${gameState.month * 80}px`;
 
-  const lowestStatTip = (p)=>{
-    const entries = [
-      ["salud financiera", p.salud||0, "Cuida tu equilibrio: revisa que tus gastos fijos no superen tu ingreso."],
-      ["ahorro", (p.ahorro||0)/2000, "Aparta un ahorro automático cada mes, antes de gastar."],
-      ["conocimiento financiero", (p.conocimiento||0)*3, "Antes de un crédito o tarjeta, compara el CAE y las condiciones."]
-    ];
-    entries.sort((a,b)=>a[1]-b[1]);
-    return entries[0][2];
-  };
+        // Check vallas
+        const hurdle = CONFIG.hurdles.find(h => h.month === gameState.month);
+        if (hurdle) {
+            triggerDecision(hurdle);
+        } else {
+            gameState.month++;
+            setTimeout(gameLoop, 600);
+        }
+    }
 
-  app.innerHTML = `
-    ${header("resultados")}
-    <div class="card">
-      <h2>Fin del primer año 🎓</h2>
-      <p class="lede">Así les fue a todos con su equilibrio financiero durante este primer año universitario.</p>
-      <table class="results">
-        <thead><tr><th>#</th><th>Jugador/a</th><th>Salud</th><th>Ahorro</th><th>Deuda</th><th>Puntaje</th></tr></thead>
-        <tbody>
-          ${players.map((p,i)=>`<tr class="${i===0?'rank1':''}">
-            <td>${i+1}</td><td>${p.name}</td><td>${p.salud||0}</td>
-            <td>${money(p.ahorro||0)}</td><td>${money(p.deuda||0)}</td><td>${p.puntaje}</td>
-          </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:10px;">Un tip para cada uno/a</h3>
-      <div class="players-strip">
-        ${players.map(p=>`<div class="player-row"><span class="player-name">${p.name}</span><span class="stat">${lowestStatTip(p)}</span></div>`).join("")}
-      </div>
-    </div>
-    <footer class="tip">Rumbo a la U — juego educativo de finanzas personales para 4° medio.</footer>
-  `;
-}
+    function triggerDecision(hurdle) {
+        gameState.isPaused = true;
+        const modal = document.getElementById('decision-modal');
+        modal.style.display = 'block';
+        document.getElementById('modal-title').innerText = hurdle.title;
+        document.getElementById('modal-text').innerText = hurdle.text;
+        
+        const optionsDiv = document.getElementById('modal-options');
+        optionsDiv.innerHTML = '';
+        hurdle.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-primary';
+            btn.innerText = opt.text;
+            btn.onclick = () => applyDecision(opt);
+            optionsDiv.appendChild(btn);
+        });
+    }
 
-/* ---------------- Inicio ---------------- */
-render();
+    function applyDecision(opt) {
+        if (opt.debt) gameState.currentDebt += Math.abs(opt.impact);
+        else gameState.balance += opt.impact;
+        
+        document.getElementById('decision-modal').style.display = 'none';
+        gameState.isPaused = false;
+        gameState.month++;
+        gameLoop();
+    }
+
+    initGame();
 </script>
 </body>
 </html>
